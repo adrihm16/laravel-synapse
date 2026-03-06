@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Synapse') }} - Acceso</title>
+    <link rel="icon" type="image/png" href="{{ asset('assets/favicon.png') }}">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
@@ -36,7 +37,7 @@
     </header>
 
     <main class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative z-10">
-        <div id="particles-js" class="absolute inset-0 z-0 pointer-events-none"></div>
+        <div id="particles-js" class="absolute inset-0 z-0"></div>
 
         <div class="max-w-md w-full space-y-8 bg-white/90 backdrop-blur-sm p-10 rounded-3xl shadow-xl border border-white/50 opacity-95 relative z-10">
             {{ $slot }}
@@ -50,13 +51,13 @@
             if (typeof particlesJS !== 'undefined') {
                 particlesJS('particles-js', {
                     particles: {
-                        number: { value: 125, density: { enable: true, value_area: 800 } },
+                        number: { value: 100, density: { enable: true, value_area: 1000 } },
                         color: { value: '#004689' },
                         shape: { type: 'circle' },
                         opacity: { value: 0.7, random: true },
-                        size: { value: 2.5, random: true },
-                        line_linked: { enable: true, distance: 150, color: '#004689', opacity: 1, width: 1 },
-                        move: { enable: true, speed: 2, direction: 'none', random: true, out_mode: 'out' }
+                        size: { value: 3, random: true },
+                        line_linked: { enable: true, distance: 180, color: '#004689', opacity: 0.5, width: 1 },
+                        move: { enable: true, speed: 1.5, direction: 'none', random: true, out_mode: 'out' }
                     },
                     interactivity: {
                         detect_on: 'canvas',

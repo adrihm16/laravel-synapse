@@ -174,7 +174,7 @@
 <!--Menu lateral-->
 <div id="menu-overlay" class="fixed inset-0 hidden transition-opacity duration-300 opacity-0 z-50"></div>
 
-<div id="sidebar-menu" class="fixed top-[72px] left-0 w-[280px] h-[calc(100vh-72px)] z-[70] bg-gradient-to-r from-[#004689] to-[#004688] text-white transform -translate-x-full transition-transform duration-300 shadow-2xl overflow-y-auto">
+<div id="sidebar-menu" class="fixed top-[72px] left-0 w-[280px] h-[calc(100vh-72px)] z-[70] bg-gradient-to-r from-[#004689] to-[#002F5C] bg-[length:100vw_100%] bg-left-top text-white transform -translate-x-full transition-transform duration-300 shadow-2xl overflow-y-auto">
   <div class="flex justify-end p-6">
     <button id="close-menu" class="text-white/80 hover:text-white transition">
       <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">

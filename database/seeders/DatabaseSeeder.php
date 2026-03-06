@@ -50,6 +50,7 @@ class DatabaseSeeder extends Seeder
         // Producto 1: One Plus 15
         $producto = Producto::create([
             'nombre' => 'One Plus 15',
+            'brand' => 'OnePlus',
             'descripcion' => 'El último flagship con cámara Hasselblad y rendimiento extremo.',
             'id_categoria' => Categoria::where('nombre', 'Smartphones')->first()->id_categoria
         ]);
@@ -87,6 +88,7 @@ class DatabaseSeeder extends Seeder
         // Producto 2: iPhone 17 Pro Max
         $producto2 = Producto::create([
             'nombre' => 'iPhone 17 Pro Max',
+            'brand' => 'Apple',
             'descripcion' => 'El mejor iPhone creado hasta la fecha con Titanium y A19 Bionic.',
             'id_categoria' => Categoria::where('nombre', 'Smartphones')->first()->id_categoria
         ]);
@@ -104,6 +106,7 @@ class DatabaseSeeder extends Seeder
         // Producto 3: Oppo Find X9 Pro
         $producto3 = Producto::create([
             'nombre' => 'Oppo Find X9 Pro',
+            'brand' => 'Oppo',
             'descripcion' => 'Innovación y diseño con carga ultrarrápida SuperVOOC.',
             'id_categoria' => Categoria::where('nombre', 'Smartphones')->first()->id_categoria
         ]);
@@ -121,6 +124,7 @@ class DatabaseSeeder extends Seeder
         // Producto 4: iPhone 17 Air
         $producto4 = Producto::create([
             'nombre' => 'iPhone 17 Air',
+            'brand' => 'Apple',
             'descripcion' => 'El diseño más fino y ligero de Apple, potencia en tus manos.',
             'id_categoria' => Categoria::where('nombre', 'Smartphones')->first()->id_categoria
         ]);
@@ -138,6 +142,7 @@ class DatabaseSeeder extends Seeder
         // Producto 5: Google Pixel Watch 4 (Audio/Wearables mockup)
         $producto5 = Producto::create([
             'nombre' => 'Google Pixel Watch 4',
+            'brand' => 'Google',
             'descripcion' => 'El smartwatch más inteligente con integración Fitbit premium.',
             'id_categoria' => Categoria::where('nombre', 'Accesorios')->first()->id_categoria
         ]);
@@ -155,6 +160,7 @@ class DatabaseSeeder extends Seeder
         // Producto 6: Nothing Phone 1
         $producto6 = Producto::create([
             'nombre' => 'Nothing Phone (1)',
+            'brand' => 'Nothing',
             'descripcion' => 'Diseño transparente con la interfaz Glyph única en su clase.',
             'id_categoria' => Categoria::where('nombre', 'Smartphones')->first()->id_categoria
         ]);
@@ -172,6 +178,7 @@ class DatabaseSeeder extends Seeder
         // Producto 7: iPad Pro
         $producto7 = Producto::create([
             'nombre' => 'iPad Pro M4',
+            'brand' => 'Apple',
             'descripcion' => 'Potencia desmesurada con el chip M4 y pantalla OLED.',
             'id_categoria' => Categoria::where('nombre', 'Tablets')->first()->id_categoria
         ]);
@@ -189,6 +196,7 @@ class DatabaseSeeder extends Seeder
         // Producto 8: Funda
         $producto8 = Producto::create([
             'nombre' => 'Funda Silicona Magnética',
+            'brand' => 'Synapse',
             'descripcion' => 'Funda resistente con anclaje magnético compatible.',
             'id_categoria' => Categoria::where('nombre', 'Accesorios')->first()->id_categoria
         ]);

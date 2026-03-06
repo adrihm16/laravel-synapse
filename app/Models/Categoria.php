@@ -20,4 +20,18 @@ class Categoria extends Model
     {
         return $this->hasMany(Producto::class, 'id_categoria', 'id_categoria');
     }
+
+    public function getImagenAttribute()
+    {
+        $catImages = [
+            'Smartphones' => 'nothingPhone1.png',
+            'Ordenadores' => 'macbookAir.png',
+            'Tablets' => 'ipadPro.png',
+            'Accesorios' => 'pixelWatch4.png',
+            'Hogar' => 'CafeteraXiaomi.png'
+        ];
+        
+        $catImg = $catImages[$this->nombre] ?? 'iPadPro.png';
+        return asset('assets/' . $catImg);
+    }
 }

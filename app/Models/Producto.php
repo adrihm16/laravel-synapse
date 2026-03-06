@@ -16,6 +16,7 @@ class Producto extends Model
         'nombre',
         'descripcion',
         'id_categoria',
+        'brand',
     ];
 
     public function categoria()
@@ -31,5 +32,25 @@ class Producto extends Model
     public function imagenes()
     {
         return $this->hasMany(ImagenProducto::class, 'id_producto', 'id_producto')->orderBy('orden', 'asc');
+    }
+
+    public function getPrecioAttribute()
+    {
+        $variante = $this->variantes->first();
+        return $variante ? (float) $variante->precio : 0.0;
+    }
+
+    public function getImagenPrincipalAttribute()
+    {
+        $variante = $this->variantes->first();
+        if ($variante && $variante->imagen) {
+            return asset($variante->imagen);
+        }
+        return asset('assets/' . str_replace(' ', '', $this->nombre) . '.png');
+    }
+
+    public function getColoresUnicosAttribute()
+    {
+        return $this->variantes->unique('color');
     }
 }

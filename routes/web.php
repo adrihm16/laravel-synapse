@@ -19,6 +19,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/carrito', [CartController::class, 'index'])->name('cart.index');
     Route::post('/carrito/add', [CartController::class, 'add'])->name('cart.add');
     Route::post('/carrito/remove', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/carrito/update', [CartController::class, 'update'])->name('cart.update');
 });
 
 Route::middleware('auth')->group(function () {

@@ -54,4 +54,34 @@ class CartController extends Controller
 
         return redirect()->route('cart.index')->with('success', 'Producto eliminado');
     }
+
+    public function update(Request $request)
+    {
+        $request->validate([
+            'id_carrito' => 'required|exists:carrito,id_carrito',
+            'action' => 'required|in:increment,decrement',
+        ]);
+
+        $user = auth()->user();
+        $cartItem = Carrito::where('id_usuario', $user->id)
+                           ->where('id_carrito', $request->id_carrito)
+                           ->first();
+
+        if ($cartItem) {
+            if ($request->action === 'increment') {
+                $cartItem->cantidad++;
+                $cartItem->save();
+            } elseif ($request->action === 'decrement') {
+                if ($cartItem->cantidad > 1) {
+                    $cartItem->cantidad--;
+                    $cartItem->save();
+                } else {
+                    $cartItem->delete();
+                    return redirect()->route('cart.index')->with('success', 'Producto eliminado del carrito');
+                }
+            }
+        }
+
+        return redirect()->route('cart.index');
+    }
 }
