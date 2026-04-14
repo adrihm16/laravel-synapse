@@ -13,7 +13,7 @@
 
       <div class="hidden md:flex flex-1 max-w-2xl mx-auto px-6">
         <div class="w-full flex">
-          <input type="text" placeholder="Buscar..." class="w-full py-2 px-4 rounded-l-full text-gray-900 focus:outline-none" />
+          <input type="text" placeholder="Buscar..." class="w-full py-2 px-4 rounded-l-full text-gray-900 bg-white focus:outline-none" />
           <button class="bg-white px-4 rounded-r-full hover:bg-gray-100 transition">
             <svg class="w-6 h-6">
               <use href="{{ asset('assets/sprite.svg#search-filled') }}"></use>
@@ -169,7 +169,6 @@
     </div>
   </nav>
 </header>
-<div class="w-full h-[130px] bg-[#001a33]"></div>
 
 <!--Menu lateral-->
 <div id="menu-overlay" class="fixed inset-0 hidden transition-opacity duration-300 opacity-0 z-50"></div>

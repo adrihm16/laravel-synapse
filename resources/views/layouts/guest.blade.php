@@ -8,17 +8,13 @@
     <title>{{ config('app.name', 'Synapse') }} - Acceso</title>
     <link rel="icon" type="image/png" href="{{ asset('assets/favicon.png') }}">
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            font-family: "Poppins", sans-serif;
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- Scripts & Styles -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col relative font-sans">
     <!-- Simple Header -->
-    <header class="w-full bg-gradient-to-r from-[#004689] to-[#002F5C] text-white py-4 px-6 shadow-md relative z-20">
+    <header class="w-full bg-gradient-to-r from-synapse to-[#002F5C] text-white py-4 px-6 shadow-md relative z-20">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <a href="{{ route('home') }}" class="font-extrabold text-2xl tracking-wide flex items-center gap-2">
                 <span class="text-white">
