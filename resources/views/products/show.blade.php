@@ -4,16 +4,22 @@
 @section('content')
   <!-- Main Content -->
   <main class="min-h-screen pt-10 pb-10 px-4 font-sans">
+      <div class="max-w-[95%] mx-auto mb-6">
+          <x-breadcrumb :items="[
+              ['label' => 'Catálogo', 'url' => route('catalog.index')],
+              ['label' => $producto->nombre]
+          ]" />
+      </div>
       <div class="max-w-[95%] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-12 items-stretch">
           
           <!-- Image Carousel Column -->
-          <div class="lg:col-span-2 bg-white rounded-3xl p-8 shadow-md flex items-center justify-between relative h-full min-h-[500px]">
+          <div class="lg:col-span-2 bg-white rounded-3xl p-8 shadow-md flex items-center justify-between relative h-full min-h-[31.25rem]">
               <button id="prev-btn" class="text-gray-300 hover:text-gray-800 text-4xl transition duration-200 px-2 z-10">
                   &#10094;
               </button>
               <div class="w-full flex justify-center absolute inset-0 items-center pointer-events-none">
                   <img id="product-img" src="{{ $producto->imagen_principal }}" alt="{{ $producto->nombre }}"
-                      class="max-h-[400px] object-contain pointer-events-auto transition-opacity duration-300">
+                      class="max-h-[25rem] object-contain pointer-events-auto transition-opacity duration-300">
               </div>
               <button id="next-btn" class="text-gray-300 hover:text-gray-800 text-4xl transition duration-200 px-2 z-10">
                   &#10095;
@@ -54,7 +60,7 @@
                                         <span class="font-medium">{{ $var->almacenamiento }}</span>
                                         <span class="text-xs mt-1">Agotado</span>
                                     </div>
-                                    <span class="px-3 py-1 bg-gray-200 rounded-full text-[10px] font-bold uppercase text-gray-500">No disponible</span>
+                                    <span class="px-3 py-1 bg-gray-200 rounded-full text-[0.625rem] font-bold uppercase text-gray-500">No disponible</span>
                                   @else
                                     <span>{{ $var->almacenamiento }}</span>
                                     <span>{{ number_format($var->precio, 2, ',', '.') }} €</span>

@@ -29,11 +29,7 @@
 
       <!-- Breadcrumb & Title -->
       <div class="mb-8">
-        <nav class="text-sm text-gray-500 mb-4">
-          <a href="{{ route('home') }}" class="hover:text-[#004689] transition">Inicio</a>
-          <span class="mx-2">/</span>
-          <span class="text-gray-800 font-medium">Catálogo</span>
-        </nav>
+        <x-breadcrumb :items="[['label' => 'Catálogo']]" />
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <h1 class="text-3xl md:text-4xl font-semibold text-gray-900">Catálogo de Productos</h1>
           <p class="text-gray-500">Mostrando <span class="font-semibold text-gray-700">{{ $productos->count() }}</span> productos</p>
@@ -53,7 +49,7 @@
 
         <!-- Filters Sidebar -->
         <aside id="filters-sidebar" class="hidden lg:block w-full lg:w-72 xl:w-80 flex-shrink-0">
-          <form method="GET" action="{{ route('catalog.index') }}" class="bg-white rounded-3xl shadow-md p-6 sticky top-[150px]">
+          <form method="GET" action="{{ route('catalog.index') }}" class="bg-white rounded-3xl shadow-md p-6 sticky top-[9.375rem]">
              
              <!-- Sorting -->
              <div class="pb-6 border-b border-gray-100 mb-6">

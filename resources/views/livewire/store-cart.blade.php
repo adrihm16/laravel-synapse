@@ -13,7 +13,7 @@
     @else
     <!--Carrito-->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-      <div class="lg:col-span-9 bg-white rounded-[2.5rem] p-6 md:p-10 shadow-md border border-gray-100 min-h-[500px]">
+      <div class="lg:col-span-9 bg-white rounded-[2.5rem] p-6 md:p-10 shadow-md border border-gray-100 min-h-[31.25rem]">
         <div id="cart-items-container" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
 
           @php $subtotal = 0; @endphp
@@ -69,7 +69,7 @@
       </div>
 
       <!--Resumen-->
-      <div class="lg:col-span-3 bg-white rounded-[2.5rem] p-6 shadow-md border border-gray-100 min-h-[500px] flex flex-col sticky top-[150px]">
+      <div class="lg:col-span-3 bg-white rounded-[2.5rem] p-6 shadow-md border border-gray-100 min-h-[31.25rem] flex flex-col sticky top-[9.375rem]">
         <h2 class="text-2xl font-light text-center mb-8 text-slate-900">Resumen</h2>
 
         <div class="space-y-4 mb-8 flex-grow">

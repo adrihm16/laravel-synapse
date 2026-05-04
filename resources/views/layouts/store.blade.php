@@ -15,7 +15,7 @@
   
   <x-store-header />
 
-  <main class="flex-grow pt-20 md:pt-24">
+  <main class="flex-grow">
     @yield('content')
   </main>
 

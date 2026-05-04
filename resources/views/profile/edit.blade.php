@@ -3,6 +3,9 @@
 
 @section('content')
     <div class="py-12 bg-gray-50 min-h-screen">
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+            <x-breadcrumb :items="[['label' => 'Mi Perfil']]" class="mb-8" />
+        </div>
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-10">
             <!-- Profile Information Card -->
             <div class="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-md border border-gray-100">
