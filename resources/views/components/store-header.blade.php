@@ -196,9 +196,9 @@
         @endauth
         
         <a href="{{ route('home') }}" class="block hover:text-white transition">Inicio</a>
-        <a href="{{ route('catalog.index') }}" class="block hover:text-white transition">Smartphones</a>
-        <a href="#" class="block hover:text-white transition">Ordenadores</a>
-        <a href="#" class="block hover:text-white transition">Tablets</a>
+        <a href="{{ route('catalog.index', ['categories[]' => 1]) }}" class="block hover:text-white transition">Smartphones</a>
+        <a href="{{ route('catalog.index', ['categories[]' => 2]) }}" class="block hover:text-white transition">Ordenadores</a>
+        <a href="{{ route('catalog.index', ['categories[]' => 3]) }}" class="block hover:text-white transition">Tablets</a>
         
         <div class="border-t border-white/20 pt-4 mt-6">
         @auth

@@ -38,7 +38,7 @@
   <section class="max-w-[95%] mx-auto px-6 py-10">
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 justify-items-center">
       @foreach($categorias as $cat)
-      <a href="{{ route('catalog.index', ['categoria' => $cat->id_categoria]) }}" class="group flex flex-col items-center w-full max-w-[260px]">
+      <a href="{{ route('catalog.index', ['categories[]' => $cat->id_categoria]) }}" class="group flex flex-col items-center w-full max-w-[260px]">
         <div
           class="bg-white rounded-[2.5rem] p-8 shadow-md shadow-black/20 hover:shadow-lg hover:shadow-black/30 hover:-translate-y-1 transition-all duration-500 w-full aspect-square flex items-center justify-center">
           <img src="{{ $cat->imagen }}" alt="{{ $cat->nombre }}"

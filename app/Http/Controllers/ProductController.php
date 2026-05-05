@@ -19,13 +19,15 @@ class ProductController extends Controller
         $query = Producto::with('variantes');
 
         // Filter by category
-        if ($request->has('categories') && is_array($request->categories)) {
-            $query->whereIn('id_categoria', $request->categories);
+        if ($request->filled('categories')) {
+            $categories = (array) $request->input('categories');
+            $query->whereIn('id_categoria', $categories);
         }
 
         // Filter by brand
-        if ($request->has('brands') && is_array($request->brands)) {
-            $query->whereIn('brand', $request->brands);
+        if ($request->filled('brands')) {
+            $brands = (array) $request->input('brands');
+            $query->whereIn('brand', $brands);
         }
 
         // Filter by price range
