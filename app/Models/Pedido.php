@@ -17,7 +17,21 @@ class Pedido extends Model
         'fecha',
         'total',
         'estado',
+        'nombre_envio',
+        'direccion',
+        'ciudad',
+        'codigo_postal',
+        'provincia',
+        'telefono',
     ];
+
+    /**
+     * Formatted order reference (e.g., SYN-000123).
+     */
+    public function getReferenciaAttribute(): string
+    {
+        return 'SYN-' . str_pad($this->id_pedido, 6, '0', STR_PAD_LEFT);
+    }
 
     public function user()
     {

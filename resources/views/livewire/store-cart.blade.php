@@ -91,9 +91,9 @@
           </div>
         </div>
 
-        <button class="w-full bg-[#004689] text-white py-3.5 rounded-full font-medium text-base hover:bg-[#002F5C] transition shadow-lg hover:shadow-xl hover:-translate-y-1 transform duration-300">
+        <a href="{{ route('checkout.index') }}" class="w-full bg-[#004689] text-white py-3.5 rounded-full font-medium text-base hover:bg-[#002F5C] transition shadow-lg hover:shadow-xl hover:-translate-y-1 transform duration-300 block text-center">
           Ir a pagar
-        </button>
+        </a>
       </div>
     </div>
     @endif
