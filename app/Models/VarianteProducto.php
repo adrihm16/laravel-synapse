@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class VarianteProducto extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'variantes_producto';
     protected $primaryKey = 'id_variante';
@@ -41,3 +42,4 @@ class VarianteProducto extends Model
         return $bgClass;
     }
 }
+

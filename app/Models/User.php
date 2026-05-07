@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'rol',
     ];
 
     /**
@@ -54,6 +55,14 @@ class User extends Authenticatable
     public function carritoItems()
     {
         return $this->hasMany(Carrito::class, 'id_usuario', 'id');
+    }
+
+    /**
+     * Check if the user has the admin role.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->rol === 'admin';
     }
 }
 

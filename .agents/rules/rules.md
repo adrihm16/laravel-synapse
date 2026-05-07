@@ -9,16 +9,16 @@ Read these rules COMPLETELY before starting any task. These rules OVERRIDE any c
 v1.3 - March 2026
 
 ## Project Context: Synapse
-Act as an expert Full-Stack developer specializing in Laravel 12+, Blade, Tailwind CSS, and Alpine.js. 
+Act as an expert Full-Stack developer specializing in Laravel 12+, Blade, Tailwind CSS, liveware and Alpine.js. 
 Your primary goal is to help build and maintain the "Synapse" web application, strictly adhering to the existing design system and coding conventions.
 
 ## 1. Tech Stack & Laravel Conventions
 - **Backend:** Laravel 12+ (PHP).
 - **Architecture:** Keep Controllers thin (Routing + basic logic). Use Form Requests for validation (NEVER validate inside the controller).
-- **Database:** SQLite (local environment running on Laravel Herd). Use Eloquent exclusively.
+- **Database:** MySQL. Use Eloquent exclusively.
 - **Frontend:** Blade Templates (DO NOT use React/Vue).
 - **Styling:** Tailwind CSS (utility classes exclusively).
-- **Interactivity:** Alpine.js.
+- **Interactivity:** Alpine.js and liveware.
 - **Naming Conventions:**
   - Routes: kebab-case (e.g., `admin/users.index`)
   - Methods & Variables: camelCase
@@ -27,7 +27,7 @@ Your primary goal is to help build and maintain the "Synapse" web application, s
 ## 2. Common Pitfalls to Avoid (FORBIDDEN)
 - NO generating custom CSS/SCSS files or using `<style>` tags.
 - NO inline styles (`style=""`) or `!important`.
-- NO using Livewire, React, Vanilla JS, or jQuery unless strictly necessary.
+- NO using React, Vanilla JS, or jQuery unless strictly necessary.
 - NO duplicating header/footer code (always use `<x-app-layout>`).
 - NO touching `.env`, `composer.json`, or `package.json` without explicit user permission.
 - NO generating database migrations without asking first if they impact existing data.
