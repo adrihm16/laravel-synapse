@@ -18,10 +18,6 @@ Route::get('/catalogo', [ProductController::class, 'index'])->name('catalog.inde
 Route::get('/producto/{id}', [ProductController::class, 'show'])->name('product.show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-
     Route::get('/carrito', [CartController::class, 'index'])->name('cart.index');
     Route::post('/carrito/add', [CartController::class, 'add'])->name('cart.add');
     Route::post('/carrito/remove', [CartController::class, 'remove'])->name('cart.remove');
@@ -37,8 +33,8 @@ Route::middleware('auth')->group(function () {
 });
 
 // Admin Routes
-Route::prefix('admin')
-    ->middleware(['auth', 'admin'])
+Route::middleware(['auth', 'admin'])
+    ->prefix('dashboard')
     ->name('admin.')
     ->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
