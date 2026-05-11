@@ -19,6 +19,14 @@ class Categoria extends Model
         'imagen',
     ];
 
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'id_categoria';
+    }
+
     public function productos()
     {
         return $this->hasMany(Producto::class, 'id_categoria', 'id_categoria');
