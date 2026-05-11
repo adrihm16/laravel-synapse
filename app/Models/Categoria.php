@@ -34,21 +34,23 @@ class Categoria extends Model
 
     public function getImagenAttribute($value)
     {
-        // If an image was uploaded via the admin panel (stored in 'imagen' column)
         if ($value) {
             return Storage::url($value);
         }
 
-        // Fallback to legacy hardcoded assets
-        $catImages = [
-            'Smartphones' => 'nothingPhone1.png',
-            'Ordenadores' => 'macbookAir.png',
-            'Tablets'     => 'ipadPro.png',
-            'Accesorios'  => 'pixelWatch4.png',
-            'Hogar'       => 'CafeteraXiaomi.png'
+        // Default images mapping based on category name
+        $defaults = [
+            'Smartphones' => 'assets/Oneplus15.png',
+            'Ordenadores' => 'assets/macbookAir.png',
+            'Tablets'     => 'assets/ipadPro.png',
+            'Accesorios'  => 'assets/pixelWatch4.png',
+            'Hogar'       => 'assets/cafeteraXiaomi.png',
         ];
-        
-        $catImg = $catImages[$this->nombre] ?? 'iPadPro.png';
-        return asset('assets/' . $catImg);
+
+        if (isset($defaults[$this->nombre])) {
+            return asset($defaults[$this->nombre]);
+        }
+
+        return asset('assets/placeholder-category.png');
     }
 }

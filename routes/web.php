@@ -45,9 +45,9 @@ Route::middleware(['auth', 'admin'])
         // Phase 2
         Route::resource('categories', AdminCategoryController::class)->except(['show']);
 
-        // Phase 3
-        Route::resource('products', AdminProductController::class);
-        Route::resource('products.variants', AdminVariantController::class)->except(['show']);
+        // Phase 3 (Pending Implementation)
+        // Route::resource('products', AdminProductController::class);
+        // Route::resource('products.variants', AdminVariantController::class)->except(['show']);
     });
 
 require __DIR__.'/auth.php';

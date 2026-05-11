@@ -5,3 +5,7 @@
   --color-synapse: #004689;
   --color-synapse-dark: #002244;
 }
+
+[x-cloak] {
+    display: none !important;
+}

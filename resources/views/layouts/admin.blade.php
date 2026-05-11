@@ -13,10 +13,6 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    <style>
-        [x-cloak] { display: none !important; }
-    </style>
 </head>
 <body class="font-sans antialiased bg-gray-50" x-data="{ sidebarOpen: false }">
     <!-- Top Bar -->
@@ -65,7 +61,7 @@
         </div>
     </header>
 
-    <div class="flex pt-[72px] min-h-screen">
+    <div class="flex min-h-screen">
         <!-- Sidebar -->
         <aside 
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
@@ -73,36 +69,36 @@
             
             <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('admin.dashboard') ? 'bg-[#004689] text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-[#004689]' }} transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    <x-icon name="dashboard" class="w-5 h-5" />
                     <span class="font-medium">Dashboard</span>
                 </a>
                 
                 <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('admin.products.*') ? 'bg-[#004689] text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-[#004689]' }} transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                    <x-icon name="box" class="w-5 h-5" />
                     <span class="font-medium">Productos</span>
                 </a>
 
                 <a href="{{ route('admin.categories.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('admin.categories.*') ? 'bg-[#004689] text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-[#004689]' }} transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+                    <x-icon name="tag" class="w-5 h-5" />
                     <span class="font-medium">Categorías</span>
                 </a>
 
                 <a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('admin.users.*') ? 'bg-[#004689] text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-[#004689]' }} transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <x-icon name="users" class="w-5 h-5" />
                     <span class="font-medium">Usuarios</span>
                 </a>
             </nav>
 
             <div class="p-4 border-t border-gray-100">
                 <a href="{{ route('home') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    <x-icon name="chevron-left" class="w-5 h-5" />
                     <span class="font-medium">Volver a la tienda</span>
                 </a>
             </div>
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 p-4 lg:p-8 w-full max-w-[100vw] lg:max-w-[calc(100vw-18rem)] overflow-x-hidden">
+        <main class="flex-1 p-4 lg:p-8 w-full max-w-[100vw] lg:max-w-[calc(100vw-18rem)] overflow-x-hidden pt-20 lg:pt-24">
             @yield('content')
         </main>
 
