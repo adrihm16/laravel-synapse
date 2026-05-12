@@ -65,27 +65,6 @@
             }
         });
 
-        // Password visibility toggle
-        document.querySelectorAll('.toggle-password').forEach(button => {
-            button.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const targetId = this.getAttribute('data-target');
-                const input = document.getElementById(targetId);
-                const eyePaths = this.querySelectorAll('.eye');
-                const eyeOffPaths = this.querySelectorAll('.eye-off');
-
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    eyePaths.forEach(p => p.classList.add('hidden'));
-                    eyeOffPaths.forEach(p => p.classList.remove('hidden'));
-                } else {
-                    input.type = 'password';
-                    eyePaths.forEach(p => p.classList.remove('hidden'));
-                    eyeOffPaths.forEach(p => p.classList.add('hidden'));
-                }
-            });
-        });
     </script>
 </body>
 </html>

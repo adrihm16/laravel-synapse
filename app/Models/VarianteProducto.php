@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+use Illuminate\Support\Facades\Storage;
+
 class VarianteProducto extends Model
 {
     use HasFactory, SoftDeletes;
@@ -40,6 +42,14 @@ class VarianteProducto extends Model
         if(str_contains($cLower, 'blue')) $bgClass = 'bg-blue-300';
         if(str_contains($cLower, 'titanium')) $bgClass = 'bg-[#898886]';
         return $bgClass;
+    }
+
+    public function getImagenUrlAttribute()
+    {
+        if (!$this->imagen) return null;
+        if (str_starts_with($this->imagen, 'http')) return $this->imagen;
+        if (str_starts_with($this->imagen, 'assets/')) return asset($this->imagen);
+        return Storage::url($this->imagen);
     }
 }
 

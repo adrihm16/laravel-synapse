@@ -7,7 +7,7 @@
     <!-- Header -->
     <div class="flex items-center gap-4">
         <a href="{{ route('admin.users.index') }}" class="p-2 rounded-xl text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            <x-icon name="arrow-left" class="w-5 h-5" />
         </a>
         <div>
             <h1 class="text-3xl font-extralight text-gray-900 tracking-tight">Nuevo Usuario</h1>

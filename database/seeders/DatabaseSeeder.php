@@ -240,5 +240,10 @@ class DatabaseSeeder extends Seeder
 
         // Images for Funda (ID 8)
         ImagenProducto::create(['id_producto' => $producto8->id_producto, 'ruta' => 'assets/Funda.png', 'orden' => 1]);
+
+        // 3. Otros Seeders
+        $this->call([
+            PhoneSeeder::class,
+        ]);
     }
 }

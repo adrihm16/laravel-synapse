@@ -32,7 +32,7 @@
         <x-breadcrumb :items="[['label' => 'Catálogo']]" />
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <h1 class="text-3xl md:text-4xl font-semibold text-gray-900">Catálogo de Productos</h1>
-          <p class="text-gray-500">Mostrando <span class="font-semibold text-gray-700">{{ $productos->count() }}</span> productos</p>
+          <p class="text-gray-500">Mostrando <span class="font-semibold text-gray-700">{{ $productos->firstItem() }}</span> - <span class="font-semibold text-gray-700">{{ $productos->lastItem() }}</span> de <span class="font-semibold text-gray-700">{{ $productos->total() }}</span> productos</p>
         </div>
       </div>
 
@@ -138,6 +138,11 @@
             <x-product-card :producto="$producto" />
             @endforeach
 
+          </div>
+
+          <!-- Pagination -->
+          <div class="mt-12">
+              {{ $productos->withQueryString()->links('vendor.pagination.synapse') }}
           </div>
         </section>
       </div>

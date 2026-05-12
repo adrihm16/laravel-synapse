@@ -1,9 +1,7 @@
 <div>
     @if($carrito->isEmpty())
       <div class="bg-white rounded-[2.5rem] p-12 shadow-md border border-gray-100 text-center">
-        <svg class="w-24 h-24 mx-auto text-gray-300 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-        </svg>
+        <x-icon name="shopping-cart" class="w-24 h-24 mx-auto text-gray-300 mb-6" />
         <h3 class="text-2xl font-medium text-gray-900 mb-2">Tu carrito está vacío</h3>
         <p class="text-gray-500 mb-8">Parece que aún no has añadido ningún producto.</p>
         <a href="{{ route('catalog.index') }}" class="inline-flex items-center gap-2 bg-[#004689] text-white font-medium px-8 py-3 rounded-full hover:opacity-90 transition">
@@ -47,9 +45,7 @@
 
             <!-- Remove Button -->
             <button @click="removing = true; setTimeout(() => $wire.remove({{ $item->id_carrito }}), 250)" class="absolute top-2 right-2 z-10 text-red-400 hover:text-red-600 p-2 bg-white rounded-full shadow-sm hover:shadow-md transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                </svg>
+                <x-icon name="trash" class="w-5 h-5" />
             </button>
 
             <a href="{{ route('product.show', $producto->id_producto) }}" class="bg-white border border-gray-200 rounded-[1.5rem] p-4 shadow-sm w-full aspect-square flex flex-col items-center justify-center relative group hover:shadow-md transition-shadow">

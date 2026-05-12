@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Support\Facades\Storage;
+
 class ImagenProducto extends Model
 {
     protected $table = 'imagen_productos';
@@ -18,5 +20,13 @@ class ImagenProducto extends Model
     public function producto()
     {
         return $this->belongsTo(Producto::class, 'id_producto', 'id_producto');
+    }
+
+    public function getUrlAttribute()
+    {
+        if (!$this->ruta) return null;
+        if (str_starts_with($this->ruta, 'http')) return $this->ruta;
+        if (str_starts_with($this->ruta, 'assets/')) return asset($this->ruta);
+        return Storage::url($this->ruta);
     }
 }

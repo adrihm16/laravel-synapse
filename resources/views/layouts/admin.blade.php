@@ -20,9 +20,7 @@
         <div class="flex items-center gap-4">
             <!-- Mobile Menu Toggle -->
             <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden text-gray-600 hover:text-[#004689] focus:outline-none">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
+                <x-icon name="menu" class="w-6 h-6" />
             </button>
             
             <a href="{{ route('admin.dashboard') }}" class="font-extrabold text-2xl tracking-wide flex items-center gap-2 text-[#004689]">
@@ -39,9 +37,7 @@
                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                 </div>
                 <span class="hidden md:block font-medium text-gray-700">{{ auth()->user()->name }}</span>
-                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
+                <x-icon name="chevron-down" class="w-4 h-4 text-gray-500" />
             </button>
 
             <!-- User Dropdown -->

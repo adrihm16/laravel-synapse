@@ -62,7 +62,7 @@ class ProductController extends Controller
             $query->orderBy('productos.created_at', 'desc');
         }
 
-        $productos = $query->get();
+        $productos = $query->paginate(12);
 
         return view('catalog.index', compact('productos', 'categorias', 'brands'));
     }
