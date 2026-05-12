@@ -73,7 +73,7 @@
                     <span class="font-medium">Dashboard</span>
                 </a>
                 
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('admin.products.*') ? 'bg-[#004689] text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-[#004689]' }} transition">
+                <a href="{{ route('admin.products.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl {{ request()->routeIs('admin.products.*') ? 'bg-[#004689] text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-[#004689]' }} transition">
                     <x-icon name="box" class="w-5 h-5" />
                     <span class="font-medium">Productos</span>
                 </a>

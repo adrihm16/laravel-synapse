@@ -9,7 +9,6 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminUserController;
-use App\Http\Controllers\Admin\AdminVariantController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -45,9 +44,8 @@ Route::middleware(['auth', 'admin'])
         // Phase 2
         Route::resource('categories', AdminCategoryController::class)->except(['show']);
 
-        // Phase 3 (Pending Implementation)
-        // Route::resource('products', AdminProductController::class);
-        // Route::resource('products.variants', AdminVariantController::class)->except(['show']);
+        // Phase 3 — Product Management
+        Route::resource('products', AdminProductController::class);
     });
 
 require __DIR__.'/auth.php';
