@@ -5,23 +5,27 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreCategoryRequest;
 use App\Models\Categoria;
+use App\Services\CategoryService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class AdminCategoryController extends Controller
 {
+    protected $categoryService;
+
+    public function __construct(CategoryService $categoryService)
+    {
+        $this->categoryService = $categoryService;
+    }
+
     /**
      * Display a listing of categories with search and product count.
      */
     public function index(Request $request)
     {
-        $query = Categoria::withCount('productos');
-
-        if ($request->filled('search')) {
-            $query->where('nombre', 'like', '%' . $request->input('search') . '%');
-        }
-
-        $categories = $query->orderBy('nombre')->paginate(15);
+        $categories = Categoria::withCount('productos')
+            ->filter($request->only('search'))
+            ->orderBy('nombre')
+            ->paginate(15);
 
         return view('admin.categories.index', compact('categories'));
     }
@@ -39,13 +43,7 @@ class AdminCategoryController extends Controller
      */
     public function store(StoreCategoryRequest $request)
     {
-        $data = $request->validated();
-
-        if ($request->hasFile('imagen')) {
-            $data['imagen'] = $request->file('imagen')->store('categories', 'public');
-        }
-
-        Categoria::create($data);
+        $this->categoryService->createCategory($request->validated(), $request);
 
         return redirect()->route('admin.categories.index')
             ->with('success', 'Categoría creada correctamente.');
@@ -64,18 +62,7 @@ class AdminCategoryController extends Controller
      */
     public function update(StoreCategoryRequest $request, Categoria $category)
     {
-        $data = $request->validated();
-
-        if ($request->hasFile('imagen')) {
-            // Delete old image from storage if it exists
-            if ($category->getRawOriginal('imagen')) {
-                Storage::disk('public')->delete($category->getRawOriginal('imagen'));
-            }
-
-            $data['imagen'] = $request->file('imagen')->store('categories', 'public');
-        }
-
-        $category->update($data);
+        $this->categoryService->updateCategory($category, $request->validated(), $request);
 
         return redirect()->route('admin.categories.index')
             ->with('success', 'Categoría actualizada correctamente.');
@@ -86,14 +73,11 @@ class AdminCategoryController extends Controller
      */
     public function destroy(Categoria $category)
     {
-        $productCount = $category->productos()->count();
-
-        if ($productCount > 0) {
+        if (!$this->categoryService->deleteCategory($category)) {
+            $productCount = $category->productos()->count();
             return redirect()->route('admin.categories.index')
                 ->with('error', "No se puede eliminar: esta categoría tiene {$productCount} producto(s) asociado(s).");
         }
-
-        $category->delete();
 
         return redirect()->route('admin.categories.index')
             ->with('success', 'Categoría eliminada correctamente.');

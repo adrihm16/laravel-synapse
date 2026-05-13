@@ -5,33 +5,26 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreUserRequest;
 use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class AdminUserController extends Controller
 {
+    protected $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
     /**
      * Display a listing of users with search and role filter.
      */
     public function index(Request $request)
     {
-        $query = User::query();
-
-        // Search by name or email
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            });
-        }
-
-        // Filter by role
-        if ($request->filled('rol')) {
-            $query->where('rol', $request->input('rol'));
-        }
-
-        $users = $query->orderBy('created_at', 'desc')->paginate(15);
+        $users = User::filter($request->only(['search', 'rol']))
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
 
         return view('admin.users.index', compact('users'));
     }
@@ -49,10 +42,7 @@ class AdminUserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
-        $data = $request->validated();
-        $data['password'] = Hash::make($data['password']);
-
-        User::create($data);
+        $this->userService->createUser($request->validated());
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Usuario creado correctamente.');
@@ -71,16 +61,7 @@ class AdminUserController extends Controller
      */
     public function update(StoreUserRequest $request, User $user)
     {
-        $data = $request->validated();
-
-        // Only update password if one was provided
-        if (!empty($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        } else {
-            unset($data['password']);
-        }
-
-        $user->update($data);
+        $this->userService->updateUser($user, $request->validated());
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Usuario actualizado correctamente.');
@@ -91,13 +72,10 @@ class AdminUserController extends Controller
      */
     public function destroy(User $user)
     {
-        // Prevent self-deletion
-        if ($user->id === auth()->id()) {
+        if (!$this->userService->deleteUser($user)) {
             return redirect()->route('admin.users.index')
                 ->with('error', 'No puedes eliminar tu propia cuenta.');
         }
-
-        $user->delete();
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Usuario eliminado correctamente.');

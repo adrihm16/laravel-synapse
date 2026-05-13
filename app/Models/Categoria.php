@@ -53,4 +53,14 @@ class Categoria extends Model
 
         return asset('assets/placeholder-category.png');
     }
+
+    /**
+     * Scope for filtering categories.
+     */
+    public function scopeFilter($query, array $filters)
+    {
+        $query->when($filters['search'] ?? null, function ($query, $search) {
+            $query->where('nombre', 'like', "%{$search}%");
+        });
+    }
 }

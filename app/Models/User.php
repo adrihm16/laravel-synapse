@@ -64,5 +64,22 @@ class User extends Authenticatable
     {
         return $this->rol === 'admin';
     }
+
+    /**
+     * Scope for filtering users.
+     */
+    public function scopeFilter($query, array $filters)
+    {
+        $query->when($filters['search'] ?? null, function ($query, $search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        });
+
+        $query->when($filters['rol'] ?? null, function ($query, $rol) {
+            $query->where('rol', $rol);
+        });
+    }
 }
 

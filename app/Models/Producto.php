@@ -62,4 +62,21 @@ class Producto extends Model
     {
         return $this->variantes->unique('color');
     }
+
+    /**
+     * Scope for filtering products.
+     */
+    public function scopeFilter($query, array $filters)
+    {
+        $query->when($filters['search'] ?? null, function ($query, $search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nombre', 'like', "%{$search}%")
+                  ->orWhere('brand', 'like', "%{$search}%");
+            });
+        });
+
+        $query->when($filters['id_categoria'] ?? null, function ($query, $id_categoria) {
+            $query->where('id_categoria', $id_categoria);
+        });
+    }
 }
