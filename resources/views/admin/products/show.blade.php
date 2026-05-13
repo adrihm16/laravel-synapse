@@ -36,6 +36,39 @@
         </div>
     @endif
 
+    <!-- Option Groups -->
+    @if($product->gruposOpciones->count() > 0)
+    <div class="bg-white rounded-3xl shadow-lg p-8">
+        <h2 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+            <x-icon name="collection" class="w-5 h-5 text-[#004689]" />
+            Atributos y Opciones
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            @foreach($product->gruposOpciones as $grupo)
+                <div class="border border-gray-100 rounded-2xl p-5 bg-gray-50/50">
+                    <h3 class="font-semibold text-gray-900 mb-3">{{ $grupo->nombre }} <span class="text-xs text-gray-400 font-normal ml-2">({{ $grupo->tipo }})</span></h3>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach($grupo->valores as $valor)
+                            <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm shadow-sm">
+                                @if($valor->imagen_url)
+                                    <img src="{{ $valor->imagen_url }}" class="w-5 h-5 rounded object-cover" />
+                                @endif
+                                @if($valor->hex_code)
+                                    <span class="w-3 h-3 rounded-full" style="background-color: {{ $valor->hex_code }}"></span>
+                                @endif
+                                <span class="font-medium text-gray-700">{{ $valor->nombre }}</span>
+                                @if($valor->precio_extra > 0)
+                                    <span class="text-xs text-green-600 font-semibold">+{{ number_format($valor->precio_extra, 2, ',', '.') }}€</span>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     <!-- Variants -->
     <div class="bg-white rounded-3xl shadow-lg p-8">
         <h2 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
@@ -47,10 +80,8 @@
             <table class="w-full text-left text-sm">
                 <thead>
                     <tr class="border-b border-gray-100 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        <th class="py-3 px-4">Imagen</th>
-                        <th class="py-3 px-4">Color</th>
-                        <th class="py-3 px-4">Almacenamiento</th>
-                        <th class="py-3 px-4">Precio</th>
+                        <th class="py-3 px-4">Opciones</th>
+                        <th class="py-3 px-4">Precio Total</th>
                         <th class="py-3 px-4">Stock</th>
                         <th class="py-3 px-4">SKU</th>
                     </tr>
@@ -59,23 +90,8 @@
                     @foreach($product->variantes as $variante)
                         <tr class="hover:bg-gray-50/50 transition">
                             <td class="py-3 px-4">
-                                @if($variante->imagen)
-                                    <div class="w-10 h-10 rounded-xl overflow-hidden bg-gray-100">
-                                        <img src="{{ $variante->imagenUrl }}" class="w-full h-full object-cover" />
-                                    </div>
-                                @else
-                                    <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
-                                        <x-icon name="image" class="w-4 h-4 text-gray-300" />
-                                    </div>
-                                @endif
+                                <span class="font-medium text-gray-900">{{ $variante->opciones_text }}</span>
                             </td>
-                            <td class="py-3 px-4">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-4 h-4 rounded-full shrink-0 {{ $variante->colorClass }}"></span>
-                                    <span class="font-medium text-gray-900">{{ $variante->color }}</span>
-                                </div>
-                            </td>
-                            <td class="py-3 px-4 text-gray-600">{{ $variante->almacenamiento }}</td>
                             <td class="py-3 px-4 font-semibold text-gray-900">{{ number_format($variante->precio, 2, ',', '.') }}€</td>
                             <td class="py-3 px-4">
                                 @if($variante->stock <= 0)
@@ -121,8 +137,8 @@
                 <p class="font-mono font-medium text-gray-900">#{{ $product->id_producto }}</p>
             </div>
             <div>
-                <p class="text-gray-400 text-xs uppercase tracking-wider mb-1">Creado</p>
-                <p class="font-medium text-gray-900">{{ $product->created_at?->format('d/m/Y H:i') ?? '—' }}</p>
+                <p class="text-gray-400 text-xs uppercase tracking-wider mb-1">Precio Base</p>
+                <p class="font-medium text-gray-900">{{ number_format($product->precio_base, 2, ',', '.') }}€</p>
             </div>
             <div>
                 <p class="text-gray-400 text-xs uppercase tracking-wider mb-1">Actualizado</p>

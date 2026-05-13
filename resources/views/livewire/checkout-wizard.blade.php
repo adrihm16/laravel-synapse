@@ -134,7 +134,7 @@
                             </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-medium text-gray-900 truncate">{{ $producto->nombre }}</p>
-                                <p class="text-xs text-gray-500">{{ $item->variante->color }} · {{ $item->variante->almacenamiento }}</p>
+                                <p class="text-xs text-gray-500">{{ $item->variante->opciones_text }}</p>
                                 <p class="text-xs text-gray-400">x{{ $item->cantidad }}</p>
                             </div>
                             <p class="text-sm font-semibold text-gray-900 flex-shrink-0">
@@ -226,7 +226,7 @@
                         </div>
                         <div class="flex-1 min-w-0">
                             <h3 class="font-medium text-gray-900">{{ $producto->nombre }}</h3>
-                            <p class="text-sm text-gray-500 mt-0.5">{{ $item->variante->color }} · {{ $item->variante->almacenamiento }}</p>
+                            <p class="text-sm text-gray-500 mt-0.5">{{ $item->variante->opciones_text }}</p>
                             <p class="text-sm text-gray-400 mt-0.5">Cantidad: {{ $item->cantidad }}</p>
                         </div>
                         <div class="text-right flex-shrink-0">
@@ -331,7 +331,7 @@
                         </div>
                         <div class="flex-1 min-w-0">
                             <p class="font-medium text-gray-900">{{ $producto->nombre }}</p>
-                            <p class="text-sm text-gray-500">{{ $detalle->variante->color }} · {{ $detalle->variante->almacenamiento }}</p>
+                            <p class="text-sm text-gray-500">{{ $detalle->variante->opciones_text }}</p>
                             <p class="text-sm text-gray-400">x{{ $detalle->cantidad }}</p>
                         </div>
                         <p class="font-semibold text-gray-900 flex-shrink-0">

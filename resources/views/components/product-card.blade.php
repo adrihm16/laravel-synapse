@@ -13,8 +13,8 @@
             {{ $producto->nombre }}
         </h3>
         
-        @if($producto->variantes->first()?->almacenamiento)
-            <p class="text-sm text-gray-500 mb-2">{{ $producto->variantes->first()?->almacenamiento }}</p>
+        @if($producto->variantes->first() && $producto->variantes->first()->opciones_text)
+            <p class="text-sm text-gray-500 mb-2 truncate max-w-full px-2">{{ $producto->variantes->first()->opciones_text }}</p>
         @endif
         
         <div class="text-2xl font-bold text-[#004689] tracking-tight">

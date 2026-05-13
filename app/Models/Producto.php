@@ -18,6 +18,7 @@ class Producto extends Model
         'descripcion',
         'id_categoria',
         'brand',
+        'precio_base',
     ];
 
     /**
@@ -35,7 +36,12 @@ class Producto extends Model
 
     public function variantes()
     {
-        return $this->hasMany(VarianteProducto::class, 'id_producto', 'id_producto');
+        return $this->hasMany(Variante::class, 'id_producto', 'id_producto');
+    }
+
+    public function gruposOpciones()
+    {
+        return $this->hasMany(GrupoOpcionProducto::class, 'id_producto', 'id_producto')->orderBy('orden', 'asc');
     }
 
     public function imagenes()
@@ -45,22 +51,30 @@ class Producto extends Model
 
     public function getPrecioAttribute()
     {
-        $variante = $this->variantes->first();
-        return $variante ? (float) $variante->precio : 0.0;
+        // Return minimum variant price or base price
+        $minPrecio = $this->variantes()->min('precio');
+        return $minPrecio ? (float) $minPrecio : (float) $this->precio_base;
     }
 
     public function getImagenPrincipalAttribute()
     {
-        $variante = $this->variantes->first();
-        if ($variante && $variante->imagen) {
-            return asset($variante->imagen);
+        // 1. Check if there are any gallery images
+        $firstGalleryImage = $this->imagenes->first();
+        if ($firstGalleryImage) {
+            return asset($firstGalleryImage->ruta);
         }
-        return asset('assets/' . str_replace(' ', '', $this->nombre) . '.png');
-    }
 
-    public function getColoresUnicosAttribute()
-    {
-        return $this->variantes->unique('color');
+        // 2. Fallback to the first option value of type 'color' that has an image
+        $colorGroup = $this->gruposOpciones->where('tipo', 'color')->first();
+        if ($colorGroup) {
+            $firstColorValue = $colorGroup->valores->whereNotNull('imagen')->first();
+            if ($firstColorValue) {
+                return $firstColorValue->imagen_url;
+            }
+        }
+
+        // 3. Fallback to asset default
+        return asset('assets/' . str_replace(' ', '', $this->nombre) . '.png');
     }
 
     /**

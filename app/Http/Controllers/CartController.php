@@ -10,14 +10,14 @@ class CartController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $carrito = Carrito::with('variante.producto')->where('id_usuario', $user->id)->get();
+        $carrito = Carrito::with(['variante.producto', 'variante.valores'])->where('id_usuario', $user->id)->get();
         return view('cart.index', compact('carrito'));
     }
 
     public function add(Request $request)
     {
         $request->validate([
-            'id_variante' => 'required|exists:variantes_producto,id_variante',
+            'id_variante' => 'required|exists:variantes,id_variante',
             'cantidad' => 'integer|min:1',
         ]);
 

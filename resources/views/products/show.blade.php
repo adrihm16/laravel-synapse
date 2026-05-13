@@ -2,8 +2,30 @@
 @section('title', $producto->nombre . ' - Synapse')
 
 @section('content')
+@php
+    $variantsData = $producto->variantes->map(function($v) {
+        return [
+            'id' => $v->id_variante,
+            'precio' => number_format($v->precio, 2, ',', '.'),
+            'stock' => $v->stock,
+            'valores' => $v->valores->pluck('id_valor')->toArray()
+        ];
+    })->values()->toJson();
+
+    // To set initial selection, pick the first variant that has stock, or just the first one.
+    $firstVariant = $producto->variantes->where('stock', '>', 0)->first() ?? $producto->variantes->first();
+    
+    $initialSelections = [];
+    if ($firstVariant) {
+        foreach ($firstVariant->valores as $valor) {
+            $initialSelections[$valor->id_grupo] = $valor->id_valor;
+        }
+    }
+    $initialSelectionsJson = json_encode($initialSelections);
+@endphp
+
   <!-- Main Content -->
-  <main class="min-h-screen pt-10 pb-10 px-4 font-sans">
+  <main class="min-h-screen pt-10 pb-10 px-4 font-sans" x-data="productSelector">
       <div class="max-w-[95%] mx-auto mb-6">
           <x-breadcrumb :items="[
               ['label' => 'Catálogo', 'url' => route('catalog.index')],
@@ -14,14 +36,15 @@
           
           <!-- Image Carousel Column -->
           <div class="lg:col-span-2 bg-white rounded-3xl p-8 shadow-md flex items-center justify-between relative h-full min-h-[31.25rem]">
-              <button id="prev-btn" class="text-gray-300 hover:text-gray-800 text-4xl transition duration-200 px-2 z-10">
+              <button @click="prevImage()" x-show="images.length > 1" class="text-gray-300 hover:text-gray-800 text-4xl transition duration-200 px-2 z-10">
                   &#10094;
               </button>
               <div class="w-full flex justify-center absolute inset-0 items-center pointer-events-none">
-                  <img id="product-img" src="{{ $producto->imagen_principal }}" alt="{{ $producto->nombre }}"
-                      class="max-h-[25rem] object-contain pointer-events-auto transition-opacity duration-300">
+                  <img :src="mainImage" alt="{{ $producto->nombre }}"
+                      class="max-h-[25rem] object-contain pointer-events-auto transition-opacity duration-300"
+                      :class="{ 'opacity-0': isTransitioning, 'opacity-100': !isTransitioning }">
               </div>
-              <button id="next-btn" class="text-gray-300 hover:text-gray-800 text-4xl transition duration-200 px-2 z-10">
+              <button @click="nextImage()" x-show="images.length > 1" class="text-gray-300 hover:text-gray-800 text-4xl transition duration-200 px-2 z-10">
                   &#10095;
               </button>
           </div>
@@ -31,45 +54,39 @@
               <div class="flex flex-col gap-6">
                   <h1 class="text-4xl font-semibold text-gray-900">{{ $producto->nombre }}</h1>
 
-                  <!-- Colors -->
+                  <!-- Dynamic Option Groups -->
+                  @foreach($producto->gruposOpciones as $grupo)
                   <div>
-                      <h3 class="text-gray-500 font-medium mb-3">Color</h3>
-                          @php $firstColor = true; @endphp
-                          @foreach($producto->colores_unicos as $var)
-                              <div class="color-option {{ $firstColor ? 'border-black ring-1 ring-black' : 'border-gray-200 hover:border-gray-400' }} rounded-lg px-4 py-3 flex items-center gap-2 cursor-pointer transition"
-                                  data-color="{{ $var->color }}">
-                                  <span class="w-4 h-4 rounded-full {{ $var->color_class }}"></span>
-                                  <span class="text-sm font-medium">{{ $var->color }}</span>
-                              </div>
-                              @php $firstColor = false; @endphp
-                          @endforeach
-                      </div>
+                      <h3 class="text-gray-500 font-medium mb-3">{{ $grupo->nombre }}</h3>
+                      @if($grupo->tipo === 'color')
+                          <div class="flex flex-wrap gap-3">
+                              @foreach($grupo->valores as $valor)
+                                  <div @click="selectOption({{ $grupo->id_grupo }}, {{ $valor->id_valor }}, '{{ $valor->imagen_url ?? '' }}')"
+                                      :class="selections[{{ $grupo->id_grupo }}] === {{ $valor->id_valor }} ? 'border-black ring-1 ring-black' : 'border-gray-200 hover:border-gray-400'"
+                                      class="rounded-lg px-4 py-3 flex items-center gap-2 cursor-pointer transition border bg-white">
+                                      @if($valor->hex_code)
+                                          <span class="w-4 h-4 rounded-full border border-gray-200" style="background-color: {{ $valor->hex_code }}"></span>
+                                      @endif
+                                      <span class="text-sm font-medium">{{ $valor->nombre }}</span>
+                                  </div>
+                              @endforeach
+                          </div>
+                      @else
+                          <div class="flex flex-col gap-3">
+                              @foreach($grupo->valores as $valor)
+                                  <div @click="selectOption({{ $grupo->id_grupo }}, {{ $valor->id_valor }}, '')"
+                                      :class="selections[{{ $grupo->id_grupo }}] === {{ $valor->id_valor }} ? 'border-black ring-1 ring-black' : 'border-gray-200 hover:border-gray-400'"
+                                      class="rounded-xl p-4 flex justify-between items-center text-sm font-medium cursor-pointer transition-all duration-200 border bg-white">
+                                      <span>{{ $valor->nombre }}</span>
+                                      @if($valor->precio_extra > 0)
+                                        <span class="text-gray-400">+{{ number_format($valor->precio_extra, 2, ',', '.') }}€</span>
+                                      @endif
+                                  </div>
+                              @endforeach
+                          </div>
+                      @endif
                   </div>
-
-                  <!-- Storage -->
-                  <div>
-                      <h3 class="text-gray-500 font-medium mb-3">Almacenamiento</h3>
-                      <div id="storage-options" class="flex flex-col gap-3">
-                          @php $firstStorage = true; @endphp
-                          @foreach($producto->variantes as $var)
-                              <div class="storage-option border {{ $var->stock > 0 && $firstStorage ? 'border-black ring-1 ring-black' : 'border-gray-200' }} {{ $var->stock <= 0 ? 'bg-gray-50 cursor-not-allowed text-gray-400' : 'cursor-pointer hover:border-gray-400 transition-all duration-200' }} rounded-xl p-4 flex justify-between items-center text-sm font-medium"
-                                  data-storage="{{ $var->almacenamiento }}" data-price="{{ number_format($var->precio, 2, ',', '.') }}" data-id="{{ $var->id_variante }}">
-                                  
-                                  @if($var->stock <= 0)
-                                    <div class="flex flex-col">
-                                        <span class="font-medium">{{ $var->almacenamiento }}</span>
-                                        <span class="text-xs mt-1">Agotado</span>
-                                    </div>
-                                    <span class="px-3 py-1 bg-gray-200 rounded-full text-[0.625rem] font-bold uppercase text-gray-500">No disponible</span>
-                                  @else
-                                    <span>{{ $var->almacenamiento }}</span>
-                                    <span>{{ number_format($var->precio, 2, ',', '.') }} €</span>
-                                    @php $firstStorage = false; @endphp
-                                  @endif
-                              </div>
-                          @endforeach
-                      </div>
-                  </div>
+                  @endforeach
 
                   <!-- Gift box -->
                   <div>
@@ -92,17 +109,22 @@
                   <div class="mt-6 pt-6 border-t border-gray-100 text-center space-y-4">
                       <form action="{{ route('cart.add') }}" method="POST">
                           @csrf
-                          <input type="hidden" name="id_variante" id="id_variante_input" value="{{ $producto->variantes->first()?->id_variante }}">
+                          <input type="hidden" name="id_variante" :value="currentVariant ? currentVariant.id : ''">
                           
                           <div class="text-gray-600 text-lg mb-4">
                               Total:
-                              <div class="text-4xl font-bold text-gray-900 mt-1" id="total-price">{{ number_format($producto->precio, 2, ',', '.') }}€</div>
+                              <div class="text-4xl font-bold text-gray-900 mt-1" x-text="currentVariant ? currentVariant.precio + '€' : '---'"></div>
                           </div>
+
+                          <div x-show="!currentVariant" class="text-red-500 mb-4 text-sm font-medium" style="display: none;">Combinación no disponible</div>
+                          <div x-show="currentVariant && currentVariant.stock <= 0" class="text-red-500 mb-4 text-sm font-medium" style="display: none;">Agotado temporalmente</div>
+
                           <button type="submit"
-                              class="w-full bg-[#004689] hover:bg-[#002F5C] text-white font-semibold text-lg py-4 rounded-full transition shadow-lg transform active:scale-95">
+                              :disabled="!currentVariant || currentVariant.stock <= 0"
+                              :class="!currentVariant || currentVariant.stock <= 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#002F5C] shadow-lg transform active:scale-95'"
+                              class="w-full bg-[#004689] text-white font-semibold text-lg py-4 rounded-full transition">
                               Añadir al carrito
                           </button>
-
                       </form>
                   </div>
               </div>
@@ -133,82 +155,68 @@
 
 @push('scripts')
 <script>
-    // Carrusel de imágenes de producto
-    const productImg = document.getElementById('product-img');
-    const prevBtn = document.getElementById('prev-btn');
-    const nextBtn = document.getElementById('next-btn');
-
-    if (productImg && prevBtn && nextBtn) {
-        const images = [
+document.addEventListener('alpine:init', () => {
+    Alpine.data('productSelector', () => ({
+        variants: {!! $variantsData !!},
+        selections: {!! $initialSelectionsJson !!},
+        currentVariant: null,
+        mainImage: '{{ $producto->imagen_principal }}',
+        images: [
             @if($producto->imagenes->count() > 0)
                 @foreach($producto->imagenes as $img)
                     "{{ asset($img->ruta) }}",
                 @endforeach
             @else
-                productImg.src, // Fallback if no gallery images exist
+                '{{ $producto->imagen_principal }}'
             @endif
-        ];
-        let currentIndex = 0;
+        ],
+        currentImageIndex: 0,
+        isTransitioning: false,
 
-        function updateImage(index) {
-            productImg.style.opacity = '0';
-            setTimeout(() => {
-                productImg.src = images[index];
-                productImg.style.opacity = '1';
-            }, 300);
-        }
+        init() {
+            this.updateVariant();
+            this.$watch('selections', () => this.updateVariant(), { deep: true });
+        },
 
-        nextBtn.addEventListener('click', () => {
-            currentIndex = (currentIndex + 1) % images.length;
-            updateImage(currentIndex);
-        });
-
-        prevBtn.addEventListener('click', () => {
-            currentIndex = (currentIndex - 1 + images.length) % images.length;
-            updateImage(currentIndex);
-        });
-    }
-
-    // Selección de opciones de producto
-    document.addEventListener('DOMContentLoaded', () => {
-        // Colores
-        const colorOptions = document.querySelectorAll('.color-option');
-        colorOptions.forEach(option => {
-            option.addEventListener('click', () => {
-                colorOptions.forEach(opt => {
-                    opt.classList.remove('border-black', 'ring-1', 'ring-black');
-                    opt.classList.add('border-gray-200');
-                });
-                option.classList.remove('border-gray-200');
-                option.classList.add('border-black', 'ring-1', 'ring-black');
-            });
-        });
-
-        // Almacenamiento
-        const storageOptions = document.querySelectorAll('.storage-option');
-        const priceDisplay = document.getElementById('total-price');
-        const variantInput = document.getElementById('id_variante_input');
-
-        storageOptions.forEach(option => {
-            if(!option.classList.contains('cursor-not-allowed')) {
-                option.addEventListener('click', () => {
-                    storageOptions.forEach(opt => {
-                        if(!opt.classList.contains('cursor-not-allowed')) {
-                            opt.classList.remove('border-black', 'ring-1', 'ring-black');
-                            opt.classList.add('border-gray-200');
-                        }
-                    });
-                    option.classList.remove('border-gray-200');
-                    option.classList.add('border-black', 'ring-1', 'ring-black');
-
-                    // Update price and hidden input
-                    const newPrice = option.getAttribute('data-price');
-                    const newId = option.getAttribute('data-id');
-                    if(newPrice) priceDisplay.textContent = newPrice + '€';
-                    if(newId) variantInput.value = newId;
-                });
+        selectOption(groupId, valueId, imageUrl) {
+            this.selections[groupId] = valueId;
+            if (imageUrl) {
+                this.isTransitioning = true;
+                setTimeout(() => {
+                    this.mainImage = imageUrl;
+                    this.isTransitioning = false;
+                }, 150);
             }
-        });
-    });
+        },
+
+        updateVariant() {
+            const selectedValueIds = Object.values(this.selections).map(Number);
+            this.currentVariant = this.variants.find(v => {
+                // Check if all selected values are in this variant
+                return selectedValueIds.every(id => v.valores.includes(id)) && v.valores.length === selectedValueIds.length;
+            });
+        },
+
+        nextImage() {
+            if (this.images.length <= 1) return;
+            this.isTransitioning = true;
+            setTimeout(() => {
+                this.currentImageIndex = (this.currentImageIndex + 1) % this.images.length;
+                this.mainImage = this.images[this.currentImageIndex];
+                this.isTransitioning = false;
+            }, 150);
+        },
+
+        prevImage() {
+            if (this.images.length <= 1) return;
+            this.isTransitioning = true;
+            setTimeout(() => {
+                this.currentImageIndex = (this.currentImageIndex - 1 + this.images.length) % this.images.length;
+                this.mainImage = this.images[this.currentImageIndex];
+                this.isTransitioning = false;
+            }, 150);
+        }
+    }));
+});
 </script>
 @endpush

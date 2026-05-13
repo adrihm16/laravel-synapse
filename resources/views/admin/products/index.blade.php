@@ -79,8 +79,8 @@
                             <td class="py-4 px-6">
                                 <div class="flex items-center gap-4">
                                     <div class="w-14 h-14 rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center shrink-0">
-                                        @if($product->variantes->first()?->imagen)
-                                            <img src="{{ $product->variantes->first()->imagenUrl }}" alt="{{ $product->nombre }}" class="w-full h-full object-cover" />
+                                        @if($product->imagen_principal)
+                                            <img src="{{ $product->imagen_principal }}" alt="{{ $product->nombre }}" class="w-full h-full object-cover" />
                                         @else
                                             <x-icon name="box" class="w-6 h-6 text-gray-300" />
                                         @endif

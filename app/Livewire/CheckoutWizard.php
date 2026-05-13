@@ -103,7 +103,7 @@ class CheckoutWizard extends Component
     public function confirm()
     {
         $user = auth()->user();
-        $carritoItems = Carrito::with('variante.producto')
+        $carritoItems = Carrito::with(['variante.producto', 'variante.valores'])
             ->where('id_usuario', $user->id)
             ->get();
 
@@ -116,7 +116,7 @@ class CheckoutWizard extends Component
         foreach ($carritoItems as $item) {
             if ($item->variante->stock < $item->cantidad) {
                 $this->dispatch('notify',
-                    message: "No hay suficiente stock de {$item->variante->producto->nombre} ({$item->variante->almacenamiento}, {$item->variante->color}). Disponible: {$item->variante->stock}.",
+                    message: "No hay suficiente stock de {$item->variante->producto->nombre} ({$item->variante->opciones_text}). Disponible: {$item->variante->stock}.",
                     type: 'error'
                 );
                 return;
@@ -170,7 +170,7 @@ class CheckoutWizard extends Component
      */
     private function getCarritoItems()
     {
-        return Carrito::with('variante.producto')
+        return Carrito::with(['variante.producto', 'variante.valores'])
             ->where('id_usuario', auth()->id())
             ->get();
     }
@@ -184,7 +184,7 @@ class CheckoutWizard extends Component
             return null;
         }
 
-        return Pedido::with('detalles.variante.producto')
+        return Pedido::with(['detalles.variante.producto', 'detalles.variante.valores'])
             ->find($this->pedidoId);
     }
 

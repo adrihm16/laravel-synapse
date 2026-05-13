@@ -51,7 +51,7 @@
             <a href="{{ route('product.show', $producto->id_producto) }}" class="bg-white border border-gray-200 rounded-[1.5rem] p-4 shadow-sm w-full aspect-square flex flex-col items-center justify-center relative group hover:shadow-md transition-shadow">
               <img src="{{ $imagen }}" alt="{{ $producto->nombre }}" class="h-32 object-contain mb-3" />
               <h3 class="text-lg font-medium text-slate-900 text-center leading-tight group-hover:text-[#004689] transition-colors">{{ $producto->nombre }}</h3>
-              <p class="text-sm text-gray-500">{{ $item->variante->almacenamiento }}</p>
+              <p class="text-sm text-gray-500">{{ $item->variante->opciones_text }}</p>
               <p class="text-base font-bold text-gray-500 mt-1">{{ number_format($precio, 2, ',', '.') }}€</p>
             </a>
 

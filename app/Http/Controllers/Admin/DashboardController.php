@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Producto;
 use App\Models\Categoria;
 use App\Models\Pedido;
-use App\Models\VarianteProducto;
+use App\Models\Variante;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -18,7 +18,7 @@ class DashboardController extends Controller
             'total_categorias' => Categoria::count(),
             'pedidos_pendientes' => Pedido::where('estado', 'pendiente')->count(),
             'ingresos_mes' => Pedido::whereMonth('fecha', now()->month)->sum('total'),
-            'stock_bajo' => VarianteProducto::where('stock', '<', 5)->count(),
+            'stock_bajo' => Variante::where('stock', '<', 5)->count(),
         ];
 
         $latestOrders = Pedido::with('user')

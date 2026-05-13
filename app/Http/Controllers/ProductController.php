@@ -16,7 +16,7 @@ class ProductController extends Controller
         $brands = Producto::whereNotNull('brand')->where('brand', '!=', '')->distinct()->pluck('brand')->sort()->values();
 
         // 2. Build the query
-        $query = Producto::with('variantes');
+        $query = Producto::with(['variantes.valores', 'gruposOpciones.valores']);
 
         // Filter by category
         if ($request->filled('categories')) {
@@ -31,7 +31,7 @@ class ProductController extends Controller
         }
 
         // Filter by price range
-        // Since price is stored in VarianteProducto, we need a whereHas query
+        // Since price is stored in Variante, we need a whereHas query
         if ($request->filled('min_price') || $request->filled('max_price')) {
             $minPrice = $request->input('min_price', 0);
             $maxPrice = $request->input('max_price', 999999);
@@ -70,10 +70,10 @@ class ProductController extends Controller
     public function show($id)
     {
         // Render single product page
-        $producto = Producto::with(['variantes', 'imagenes'])->findOrFail($id);
+        $producto = Producto::with(['variantes.valores', 'gruposOpciones.valores', 'imagenes'])->findOrFail($id);
         
         // Also fetch related products
-        $relacionados = Producto::with('variantes')
+        $relacionados = Producto::with(['variantes.valores', 'gruposOpciones.valores'])
             ->where('id_categoria', $producto->id_categoria)
             ->where('id_producto', '!=', $id)
             ->take(4)->get();
