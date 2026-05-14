@@ -70,7 +70,7 @@ class AdminProductController extends Controller
      */
     public function edit(Producto $product)
     {
-        $product->load(['variantes', 'imagenes']);
+        $product->load(['variantes.valores', 'gruposOpciones.valores', 'imagenes']);
         $categories = Categoria::orderBy('nombre')->get();
 
         return view('admin.products.edit', compact('product', 'categories'));

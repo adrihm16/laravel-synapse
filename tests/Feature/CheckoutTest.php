@@ -8,7 +8,7 @@ use App\Models\Pedido;
 use App\Models\DetallePedido;
 use App\Models\Producto;
 use App\Models\User;
-use App\Models\VarianteProducto;
+use App\Models\Variante;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use App\Livewire\CheckoutWizard;
@@ -19,7 +19,7 @@ class CheckoutTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
-    private VarianteProducto $variante;
+    private Variante $variante;
 
     protected function setUp(): void
     {
@@ -27,9 +27,8 @@ class CheckoutTest extends TestCase
         $this->user = User::factory()->create(['name' => 'Elena Test']);
         $cat = Categoria::factory()->create(['nombre' => 'Smartphones']);
         $prod = Producto::factory()->create(['nombre' => 'Phone X', 'id_categoria' => $cat->id_categoria]);
-        $this->variante = VarianteProducto::factory()->create([
-            'id_producto' => $prod->id_producto, 'color' => 'Black',
-            'almacenamiento' => '256GB', 'precio' => 799.99, 'stock' => 10,
+        $this->variante = Variante::factory()->create([
+            'id_producto' => $prod->id_producto, 'precio' => 799.99, 'stock' => 10,
         ]);
     }
 
@@ -264,9 +263,8 @@ class CheckoutTest extends TestCase
     {
         $cat = Categoria::first();
         $prod2 = Producto::factory()->create(['nombre' => 'Tablet Y', 'id_categoria' => $cat->id_categoria]);
-        $v2 = VarianteProducto::factory()->create([
-            'id_producto' => $prod2->id_producto, 'color' => 'White',
-            'almacenamiento' => '128GB', 'precio' => 499.99, 'stock' => 5,
+        $v2 = Variante::factory()->create([
+            'id_producto' => $prod2->id_producto, 'precio' => 499.99, 'stock' => 5,
         ]);
 
         Carrito::create(['id_usuario' => $this->user->id, 'id_variante' => $this->variante->id_variante, 'cantidad' => 1]);

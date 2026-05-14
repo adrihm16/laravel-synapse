@@ -6,7 +6,7 @@ use App\Models\Carrito;
 use App\Models\Categoria;
 use App\Models\Producto;
 use App\Models\User;
-use App\Models\VarianteProducto;
+use App\Models\Variante;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,7 +15,7 @@ class CartTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
-    private VarianteProducto $variante;
+    private Variante $variante;
 
     protected function setUp(): void
     {
@@ -23,9 +23,8 @@ class CartTest extends TestCase
         $this->user = User::factory()->create();
         $cat = Categoria::factory()->create(['nombre' => 'Smartphones']);
         $prod = Producto::factory()->create(['nombre' => 'Test Phone', 'id_categoria' => $cat->id_categoria]);
-        $this->variante = VarianteProducto::factory()->create([
-            'id_producto' => $prod->id_producto, 'color' => 'Black',
-            'almacenamiento' => '256GB', 'precio' => 999.99, 'stock' => 10,
+        $this->variante = Variante::factory()->create([
+            'id_producto' => $prod->id_producto, 'precio' => 999.99, 'stock' => 10,
         ]);
     }
 

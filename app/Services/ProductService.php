@@ -4,8 +4,6 @@ namespace App\Services;
 
 use App\Models\ImagenProducto;
 use App\Models\Producto;
-use App\Models\GrupoOpcionProducto;
-use App\Models\ValorOpcionProducto;
 use App\Models\Variante;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -117,18 +115,64 @@ class ProductService
                 'precio_base'  => $data['precio_base'] ?? 0,
             ]);
 
-            // Update existing variants (price, stock, sku)
+            // Update existing variants (price, stock, sku only)
             if (!empty($data['variantes_existentes'])) {
                 foreach ($data['variantes_existentes'] as $variantData) {
-                    if (isset($variantData['id_variante'])) {
-                        $variant = Variante::find($variantData['id_variante']);
-                        if ($variant && $variant->id_producto === $product->id_producto) {
-                            $variant->update([
-                                'precio' => $variantData['precio'],
-                                'stock'  => $variantData['stock'],
-                                'sku'    => $variantData['sku'] ?? null,
-                            ]);
+                    $variant = Variante::find($variantData['id_variante']);
+                    if ($variant && $variant->id_producto === $product->id_producto) {
+                        $variant->update([
+                            'precio' => $variantData['precio'],
+                            'stock'  => $variantData['stock'],
+                            'sku'    => $variantData['sku'] ?? null,
+                        ]);
+                    }
+                }
+            }
+
+            // Persist new option values into existing groups and build a ref → id_valor map
+            // so new variants can reference them via temp keys like "nv_{groupId}_{index}".
+            $newValueRefMap = [];
+            if (!empty($data['valores_nuevos'])) {
+                foreach ($data['valores_nuevos'] as $groupId => $newValues) {
+                    $grupo = $product->gruposOpciones()->find($groupId);
+                    if (!$grupo) continue;
+                    $nextOrden = $grupo->valores()->max('orden') ?? -1;
+                    foreach ($newValues as $index => $valorData) {
+                        $nextOrden++;
+                        $valor = $grupo->valores()->create([
+                            'nombre'       => $valorData['nombre'],
+                            'hex_code'     => !empty($valorData['hex_code']) ? $valorData['hex_code'] : null,
+                            'precio_extra' => $valorData['precio_extra'] ?? 0,
+                            'orden'        => $nextOrden,
+                        ]);
+                        $newValueRefMap["nv_{$groupId}_{$index}"] = $valor->id_valor;
+                    }
+                }
+            }
+
+            // Create new variants, resolving both existing value IDs and new value temp refs
+            if (!empty($data['variantes_nuevas'])) {
+                foreach ($data['variantes_nuevas'] as $newVariant) {
+                    $variante = $product->variantes()->create([
+                        'precio' => $newVariant['precio'],
+                        'stock'  => $newVariant['stock'],
+                        'sku'    => $newVariant['sku'] ?? null,
+                    ]);
+
+                    $valuesToAttach = [];
+
+                    foreach ($newVariant['valores_existentes'] ?? [] as $id) {
+                        $valuesToAttach[] = (int) $id;
+                    }
+
+                    foreach ($newVariant['valores_nuevos'] ?? [] as $ref) {
+                        if (isset($newValueRefMap[$ref])) {
+                            $valuesToAttach[] = $newValueRefMap[$ref];
                         }
+                    }
+
+                    if (!empty($valuesToAttach)) {
+                        $variante->valores()->attach($valuesToAttach);
                     }
                 }
             }

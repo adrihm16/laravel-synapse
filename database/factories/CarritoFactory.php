@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Carrito;
 use App\Models\User;
-use App\Models\VarianteProducto;
+use App\Models\Variante;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,7 +18,7 @@ class CarritoFactory extends Factory
     {
         return [
             'id_usuario'  => User::factory(),
-            'id_variante' => VarianteProducto::factory(),
+            'id_variante' => Variante::factory(),
             'cantidad'    => fake()->numberBetween(1, 3),
         ];
     }

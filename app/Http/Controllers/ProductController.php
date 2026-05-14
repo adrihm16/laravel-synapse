@@ -26,19 +26,17 @@ class ProductController extends Controller
 
         // Filter by brand
         if ($request->filled('brands')) {
-            $brands = (array) $request->input('brands');
-            $query->whereIn('brand', $brands);
+            $selectedBrands = (array) $request->input('brands');
+            $query->whereIn('brand', $selectedBrands);
         }
 
         // Filter by price range
-        // Since price is stored in Variante, we need a whereHas query
         if ($request->filled('min_price') || $request->filled('max_price')) {
-            $minPrice = $request->input('min_price', 0);
-            $maxPrice = $request->input('max_price', 999999);
-            
-            $query->whereHas('variantes', function($q) use ($minPrice, $maxPrice) {
-                // Determine which condition to apply to optimize the query
-                if ($minPrice > 0 && $maxPrice < 999999) {
+            $minPrice = $request->filled('min_price') ? (float) $request->input('min_price') : 0;
+            $maxPrice = $request->filled('max_price') ? (float) $request->input('max_price') : null;
+
+            $query->whereHas('variantes', function ($q) use ($minPrice, $maxPrice) {
+                if ($minPrice > 0 && $maxPrice !== null) {
                     $q->whereBetween('precio', [$minPrice, $maxPrice]);
                 } elseif ($minPrice > 0) {
                     $q->where('precio', '>=', $minPrice);

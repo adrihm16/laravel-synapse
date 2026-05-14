@@ -121,29 +121,87 @@
             </div>
         </div>
 
-        <!-- Opciones (Solo lectura simplificada para edición) -->
+        <!-- Opciones y Valores (Interactivo) -->
         @if(count($existingGroups) > 0)
         <div class="bg-white rounded-3xl shadow-lg p-8">
-            <h2 class="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+            <h2 class="text-xl font-semibold text-gray-900 mb-2 flex items-center gap-2">
                 <x-icon name="collection" class="w-6 h-6 text-[#004689]" />
-                Opciones actuales
+                Opciones y Valores
             </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                @foreach($product->gruposOpciones as $grupo)
+            <p class="text-sm text-gray-500 mb-6">Los valores existentes se muestran en gris. Añade nuevos valores a cada grupo antes de crear variantes que los usen.</p>
+            <div class="space-y-5">
+                <template x-for="group in groups" :key="group.id_db">
                     <div class="border border-gray-100 rounded-2xl p-5 bg-gray-50/50">
-                        <h3 class="font-semibold text-gray-900 mb-3">{{ $grupo->nombre }}</h3>
-                        <div class="flex flex-wrap gap-2">
-                            @foreach($grupo->valores as $valor)
-                                <div class="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 shadow-sm flex items-center gap-2">
-                                    @if($valor->hex_code)
-                                        <span class="w-3 h-3 rounded-full" style="background-color: {{ $valor->hex_code }}"></span>
-                                    @endif
-                                    {{ $valor->nombre }}
+                        <!-- Group header -->
+                        <div class="flex items-center gap-2 mb-3">
+                            <h3 class="font-semibold text-gray-900" x-text="group.name"></h3>
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-medium capitalize" x-text="group.type"></span>
+                        </div>
+
+                        <!-- Existing + pending new values -->
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <template x-for="val in group.values" :key="val.id_db">
+                                <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 shadow-sm">
+                                    <template x-if="group.type === 'color' && val.hex_code">
+                                        <span class="w-3 h-3 rounded-full shrink-0" :style="`background-color:${val.hex_code}`"></span>
+                                    </template>
+                                    <span x-text="val.name"></span>
+                                    <span x-show="val.precio_extra > 0" class="text-xs text-gray-400" x-text="`+${val.precio_extra}€`"></span>
                                 </div>
-                            @endforeach
+                            </template>
+                            <template x-for="(val, i) in (pendingNewValues[group.id_db] || [])" :key="i">
+                                <div class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-800 shadow-sm">
+                                    <template x-if="group.type === 'color' && val.hex_code">
+                                        <span class="w-3 h-3 rounded-full shrink-0" :style="`background-color:${val.hex_code}`"></span>
+                                    </template>
+                                    <span x-text="val.nombre"></span>
+                                    <span x-show="val.precio_extra > 0" class="text-xs opacity-60" x-text="`+${val.precio_extra}€`"></span>
+                                    <button type="button" @click="removeNewValue(group.id_db, i)"
+                                            class="ml-1 text-emerald-500 hover:text-red-500 transition font-bold leading-none text-base"
+                                            title="Eliminar este valor pendiente">&times;</button>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Add new value form -->
+                        <div class="border-t border-gray-100 pt-4">
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Añadir nuevo valor</p>
+                            <div class="flex flex-wrap items-end gap-3">
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Nombre *</label>
+                                    <input type="text"
+                                           x-model="newValueInputs[group.id_db].nombre"
+                                           placeholder="Ej. Verde"
+                                           class="rounded-xl border border-gray-200 bg-white focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none px-3 py-2 text-sm w-40">
+                                </div>
+                                <template x-if="group.type === 'color'">
+                                    <div>
+                                        <label class="block text-xs text-gray-500 mb-1">Color</label>
+                                        <input type="color"
+                                               x-model="newValueInputs[group.id_db].hex_code"
+                                               class="rounded-lg border border-gray-200 w-12 h-9 p-0.5 cursor-pointer">
+                                    </div>
+                                </template>
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Precio extra (€)</label>
+                                    <input type="number" step="0.01" min="0"
+                                           x-model="newValueInputs[group.id_db].precio_extra"
+                                           placeholder="0.00"
+                                           class="rounded-xl border border-gray-200 bg-white focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none px-3 py-2 text-sm w-28">
+                                </div>
+                                <button type="button"
+                                        @click="addNewValueToGroup(group.id_db)"
+                                        :disabled="!newValueInputs[group.id_db]?.nombre?.trim()"
+                                        :class="newValueInputs[group.id_db]?.nombre?.trim()
+                                            ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'"
+                                        class="px-4 py-2 rounded-xl text-sm font-semibold transition">
+                                    + Añadir valor
+                                </button>
+                            </div>
                         </div>
                     </div>
-                @endforeach
+                </template>
             </div>
         </div>
         @endif
@@ -170,11 +228,7 @@
                             <tr class="hover:bg-gray-50/50">
                                 <td class="py-3 px-4 font-medium text-gray-900" x-text="variant.names"></td>
                                 <td class="py-2 px-4">
-                                    <!-- Campos marcados como obsoletos, pero retenidos para update básico -->
                                     <input type="hidden" :name="`variantes_existentes[${vIndex}][id_variante]`" :value="variant.id_db">
-                                    <input type="hidden" :name="`variantes_existentes[${vIndex}][color]`" value="N/A">
-                                    <input type="hidden" :name="`variantes_existentes[${vIndex}][almacenamiento]`" value="N/A">
-                                    
                                     <input type="number" step="0.01" :name="`variantes_existentes[${vIndex}][precio]`" x-model="variant.price" required
                                            class="w-full text-sm rounded-lg border-gray-200 focus:ring-black focus:border-black text-right px-2 py-1.5">
                                 </td>
@@ -192,6 +246,135 @@
                 </table>
             </div>
         </div>
+
+        <!-- Añadir Nuevas Variantes -->
+        @if(count($existingGroups) > 0)
+        <div class="bg-white rounded-3xl shadow-lg p-8">
+            <h2 class="text-xl font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                <x-icon name="plus-circle" class="w-6 h-6 text-[#004689]" />
+                Añadir Nuevas Variantes
+            </h2>
+            <p class="text-sm text-gray-500 mb-6">Selecciona una opción de cada grupo, rellena precio y stock, y pulsa «Añadir».</p>
+
+            <!-- Selectors per group -->
+            <div class="space-y-5 mb-6">
+                <template x-for="group in groups" :key="group.id_db">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-700 mb-2" x-text="group.name"></p>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="val in allGroupValues(group.id_db)" :key="val.key">
+                                <button type="button"
+                                    @click="selectValue(group.id_db, val)"
+                                    :class="isSelected(group.id_db, val.key)
+                                        ? 'bg-[#004689] text-white border-[#004689] shadow'
+                                        : 'bg-white text-gray-700 border-gray-200 hover:border-[#004689]'"
+                                    class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm transition">
+                                    <template x-if="group.type === 'color' && val.hex_code">
+                                        <span class="w-3.5 h-3.5 rounded-full border border-white/40 shrink-0"
+                                              :style="`background-color:${val.hex_code}`"></span>
+                                    </template>
+                                    <span x-text="val.name"></span>
+                                    <span x-show="val.precio_extra > 0" class="opacity-70 text-xs"
+                                          x-text="`+${val.precio_extra}€`"></span>
+                                    <template x-if="val.isNew">
+                                        <span class="text-xs bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-medium">nuevo</span>
+                                    </template>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Price / Stock / SKU row -->
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Precio final (€) *</label>
+                    <input type="number" step="0.01" x-model="newPrice" placeholder="0.00" min="0"
+                           class="w-full rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Stock *</label>
+                    <input type="number" x-model="newStock" placeholder="0" min="0"
+                           class="w-full rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">SKU</label>
+                    <input type="text" x-model="newSku" placeholder="Opcional"
+                           class="w-full rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent outline-none px-3 py-2 text-sm">
+                </div>
+                <div class="flex items-end">
+                    <button type="button" @click="addPending()"
+                        :disabled="!allGroupsSelected || !newPrice"
+                        :class="allGroupsSelected && newPrice ? 'bg-[#004689] hover:bg-[#002244] text-white' : 'bg-gray-100 text-gray-400 cursor-not-allowed'"
+                        class="w-full py-2 px-4 rounded-xl font-semibold text-sm transition">
+                        + Añadir
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pending new variants table -->
+            <template x-if="pendingVariants.length > 0">
+                <div class="border border-gray-100 rounded-2xl overflow-hidden mt-4">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <tr>
+                                <th class="py-3 px-4">Combinación</th>
+                                <th class="py-3 px-4 w-28">Precio</th>
+                                <th class="py-3 px-4 w-24">Stock</th>
+                                <th class="py-3 px-4 w-36">SKU</th>
+                                <th class="py-3 px-4 w-12"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50">
+                            <template x-for="(v, i) in pendingVariants" :key="i">
+                                <tr class="hover:bg-gray-50/50">
+                                    <td class="py-3 px-4 font-medium text-gray-800" x-text="pendingLabel(v)"></td>
+                                    <td class="py-3 px-4 text-gray-700" x-text="v.price + ' €'"></td>
+                                    <td class="py-3 px-4 text-gray-700" x-text="v.stock"></td>
+                                    <td class="py-3 px-4 text-gray-500 text-xs" x-text="v.sku || '—'"></td>
+                                    <td class="py-3 px-4">
+                                        <button type="button" @click="removePending(i)"
+                                                class="text-red-400 hover:text-red-600 transition">
+                                            <x-icon name="trash" class="w-4 h-4" />
+                                        </button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+
+            <!-- Hidden inputs: pending new variants -->
+            <template x-for="(v, vIdx) in pendingVariants" :key="vIdx">
+                <div>
+                    <input type="hidden" :name="`variantes_nuevas[${vIdx}][precio]`" :value="v.price">
+                    <input type="hidden" :name="`variantes_nuevas[${vIdx}][stock]`"  :value="v.stock">
+                    <input type="hidden" :name="`variantes_nuevas[${vIdx}][sku]`"    :value="v.sku">
+                    <template x-for="[gId, sel] in Object.entries(v.selections)" :key="gId">
+                        <template x-if="!sel.isNew">
+                            <input type="hidden" :name="`variantes_nuevas[${vIdx}][valores_existentes][]`" :value="sel.id_db">
+                        </template>
+                        <template x-if="sel.isNew">
+                            <input type="hidden" :name="`variantes_nuevas[${vIdx}][valores_nuevos][]`" :value="sel.key">
+                        </template>
+                    </template>
+                </div>
+            </template>
+
+            <!-- Hidden inputs: new option values data -->
+            <template x-for="group in groups" :key="group.id_db">
+                <template x-for="(val, index) in (pendingNewValues[group.id_db] || [])" :key="index">
+                    <div>
+                        <input type="hidden" :name="`valores_nuevos[${group.id_db}][${index}][nombre]`"      :value="val.nombre">
+                        <input type="hidden" :name="`valores_nuevos[${group.id_db}][${index}][hex_code]`"    :value="val.hex_code || ''">
+                        <input type="hidden" :name="`valores_nuevos[${group.id_db}][${index}][precio_extra]`" :value="val.precio_extra || 0">
+                    </div>
+                </template>
+            </template>
+        </div>
+        @endif
 
         <!-- Galería de Imágenes -->
         <div class="bg-white rounded-3xl shadow-lg p-8">
@@ -244,6 +427,98 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('productEditForm', () => ({
         basePrice: {{ $product->precio_base }},
         existingVariants: {!! json_encode($existingVariants) !!},
+        groups: {!! json_encode($existingGroups) !!},
+
+        // New variant builder
+        selectedValues: {},
+        newPrice: '',
+        newStock: 0,
+        newSku: '',
+        pendingVariants: [],
+
+        // New option values (per group)
+        pendingNewValues: {},
+        newValueInputs: {},
+
+        init() {
+            this.groups.forEach(g => {
+                this.newValueInputs[g.id_db] = { nombre: '', hex_code: '#000000', precio_extra: 0 };
+                this.pendingNewValues[g.id_db] = [];
+            });
+        },
+
+        get allGroupsSelected() {
+            return this.groups.length > 0 &&
+                   Object.keys(this.selectedValues).length === this.groups.length;
+        },
+
+        // Returns merged list of existing + pending new values for a group,
+        // each with a stable `key` for Alpine tracking and isNew flag.
+        allGroupValues(groupId) {
+            const group = this.groups.find(g => g.id_db === groupId);
+            const existing = (group?.values || []).map(v => ({ ...v, key: `ex_${v.id_db}`, isNew: false }));
+            const pending  = (this.pendingNewValues[groupId] || []).map((v, i) => ({
+                id_db:       null,
+                key:         `nv_${groupId}_${i}`,
+                isNew:       true,
+                arrayIndex:  i,
+                name:        v.nombre,
+                hex_code:    v.hex_code,
+                precio_extra: v.precio_extra,
+            }));
+            return [...existing, ...pending];
+        },
+
+        selectValue(groupId, val) {
+            this.selectedValues[groupId] = val;
+        },
+
+        isSelected(groupId, key) {
+            return this.selectedValues[groupId]?.key === key;
+        },
+
+        addNewValueToGroup(groupId) {
+            const input = this.newValueInputs[groupId];
+            if (!input?.nombre?.trim()) return;
+            const group = this.groups.find(g => g.id_db === groupId);
+            this.pendingNewValues[groupId].push({
+                nombre:       input.nombre.trim(),
+                hex_code:     group?.type === 'color' ? (input.hex_code || null) : null,
+                precio_extra: parseFloat(input.precio_extra) || 0,
+            });
+            this.newValueInputs[groupId] = { nombre: '', hex_code: '#000000', precio_extra: 0 };
+        },
+
+        removeNewValue(groupId, index) {
+            this.pendingNewValues[groupId].splice(index, 1);
+            // Remove pending variants that referenced any new value from this group
+            this.pendingVariants = this.pendingVariants.filter(v => !v.selections[groupId]?.isNew);
+            if (this.selectedValues[groupId]?.isNew) {
+                delete this.selectedValues[groupId];
+            }
+        },
+
+        addPending() {
+            if (!this.allGroupsSelected || !this.newPrice) return;
+            this.pendingVariants.push({
+                selections: JSON.parse(JSON.stringify(this.selectedValues)),
+                price: this.newPrice,
+                stock: this.newStock,
+                sku:   this.newSku,
+            });
+            this.selectedValues = {};
+            this.newPrice = '';
+            this.newStock = 0;
+            this.newSku = '';
+        },
+
+        removePending(index) {
+            this.pendingVariants.splice(index, 1);
+        },
+
+        pendingLabel(v) {
+            return Object.values(v.selections).map(s => s.name).join(' · ');
+        },
     }));
 });
 </script>

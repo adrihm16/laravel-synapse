@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(findstr /i \"cursor copilot CLAUDE AGENTS\")",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\elena\\\\repositorio_git\\\\Repositorios_2526\\\\synapse-laravel\\\\database\\\\migrations\" | Where-Object { $_.Name -match \"\\(grupo|valor|variante\\)\" } | Select-Object Name)"
+    ]
+  }
+}

@@ -38,13 +38,30 @@ class UpdateProductRequest extends FormRequest
             'grupos.*.valores.*.precio_extra' => ['nullable', 'numeric', 'min:0'],
             'grupos.*.valores.*.imagen'       => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
 
-            // Variants
-            'variantes'                  => ['nullable', 'array'],
-            'variantes.*.precio'         => ['required', 'numeric', 'min:0'],
-            'variantes.*.stock'          => ['required', 'integer', 'min:0'],
-            'variantes.*.sku'            => ['nullable', 'string', 'max:50'],
-            'variantes.*.valores'        => ['nullable', 'array'], // e.g. ["0_0", "1_0"]
-            'variantes.*.valores.*'      => ['string'],
+            // Existing variants (price/stock/sku updates only)
+            'variantes_existentes'                  => ['nullable', 'array'],
+            'variantes_existentes.*.id_variante'    => ['required_with:variantes_existentes', 'integer', 'exists:variantes,id_variante'],
+            'variantes_existentes.*.precio'         => ['required_with:variantes_existentes', 'numeric', 'min:0'],
+            'variantes_existentes.*.stock'          => ['required_with:variantes_existentes', 'integer', 'min:0'],
+            'variantes_existentes.*.sku'            => ['nullable', 'string', 'max:50'],
+
+            // New variants to add (may reference existing value IDs or temp refs for new values)
+            'variantes_nuevas'                          => ['nullable', 'array'],
+            'variantes_nuevas.*.precio'                 => ['required_with:variantes_nuevas', 'numeric', 'min:0'],
+            'variantes_nuevas.*.stock'                  => ['required_with:variantes_nuevas', 'integer', 'min:0'],
+            'variantes_nuevas.*.sku'                    => ['nullable', 'string', 'max:50'],
+            'variantes_nuevas.*.valores_existentes'     => ['nullable', 'array'],
+            'variantes_nuevas.*.valores_existentes.*'   => ['integer', 'exists:valores_opcion_producto,id_valor'],
+            'variantes_nuevas.*.valores_nuevos'         => ['nullable', 'array'],
+            'variantes_nuevas.*.valores_nuevos.*'       => ['nullable', 'string', 'max:50'],
+
+            // New option values to persist into existing groups
+            'valores_nuevos'                    => ['nullable', 'array'],
+            'valores_nuevos.*'                  => ['nullable', 'array'],
+            'valores_nuevos.*.*'                => ['nullable', 'array'],
+            'valores_nuevos.*.*.nombre'         => ['required_with:valores_nuevos.*', 'string', 'max:100'],
+            'valores_nuevos.*.*.hex_code'       => ['nullable', 'string', 'max:20'],
+            'valores_nuevos.*.*.precio_extra'   => ['nullable', 'numeric', 'min:0'],
 
             // Gallery images
             'imagenes'   => ['nullable', 'array'],
