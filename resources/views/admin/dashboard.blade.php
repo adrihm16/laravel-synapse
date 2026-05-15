@@ -47,8 +47,8 @@
     <div class="bg-white rounded-[2rem] shadow-xl p-8 mt-12 overflow-hidden border border-gray-100">
         <div class="flex items-center justify-between mb-8">
             <h2 class="text-2xl text-gray-900 tracking-tight">Últimos Pedidos</h2>
-            <a href="#" class="inline-flex items-center gap-2 text-sm text-[#004689] hover:text-[#002244] transition-colors group">
-                Ver historial completo 
+            <a href="{{ route('admin.orders.index') }}" class="inline-flex items-center gap-2 text-sm text-[#004689] hover:text-[#002244] transition-colors group">
+                Ver historial completo
                 <x-icon name="chevron-right" class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
             </a>
         </div>

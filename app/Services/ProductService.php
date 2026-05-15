@@ -115,6 +115,37 @@ class ProductService
                 'precio_base'  => $data['precio_base'] ?? 0,
             ]);
 
+            // Delete specified existing variants
+            if (!empty($data['eliminar_variantes'])) {
+                $toDelete = Variante::whereIn('id_variante', $data['eliminar_variantes'])
+                    ->where('id_producto', $product->id_producto)
+                    ->get();
+                foreach ($toDelete as $v) {
+                    $v->valores()->detach();
+                    $v->delete();
+                }
+            }
+
+            // Delete specified option values and cascade to any variants still linked to them
+            if (!empty($data['eliminar_valores'])) {
+                $valores = \App\Models\ValorOpcionProducto::whereIn('id_valor', $data['eliminar_valores'])
+                    ->whereHas('grupo', fn($q) => $q->where('id_producto', $product->id_producto))
+                    ->get();
+                foreach ($valores as $valor) {
+                    $linkedIds = DB::table('variante_valores')
+                        ->where('id_valor', $valor->id_valor)
+                        ->pluck('id_variante');
+                    foreach ($linkedIds as $varId) {
+                        $v = Variante::find($varId);
+                        if ($v) {
+                            $v->valores()->detach();
+                            $v->delete();
+                        }
+                    }
+                    $valor->delete();
+                }
+            }
+
             // Update existing variants (price, stock, sku only)
             if (!empty($data['variantes_existentes'])) {
                 foreach ($data['variantes_existentes'] as $variantData) {
@@ -177,7 +208,7 @@ class ProductService
                 }
             }
 
-            // 5. Delete removed gallery images
+            // 5. Delete removed gallery images (global + per-color)
             if (!empty($data['eliminar_imagenes'])) {
                 $imagesToDelete = ImagenProducto::whereIn('id_imagen', $data['eliminar_imagenes'])
                     ->where('id_producto', $product->id_producto)
@@ -189,7 +220,7 @@ class ProductService
                 }
             }
 
-            // 6. Upload new gallery images
+            // 6. Upload new global gallery images
             if ($request->hasFile('imagenes')) {
                 $maxOrder = $product->imagenes()->max('orden') ?? -1;
 
@@ -201,6 +232,28 @@ class ProductService
                         'ruta'  => $path,
                         'orden' => $maxOrder,
                     ]);
+                }
+            }
+
+            // 7. Upload new per-color gallery images
+            // Input name: galeria_color[{id_valor}][] (multiple files per color)
+            if ($request->hasFile('galeria_color')) {
+                foreach ($request->file('galeria_color') as $idValor => $files) {
+                    $maxOrder = ImagenProducto::where('id_producto', $product->id_producto)
+                        ->where('id_valor', $idValor)
+                        ->max('orden') ?? -1;
+
+                    foreach ($files as $file) {
+                        $maxOrder++;
+                        $path = $file->store("products/{$product->id_producto}/colors/{$idValor}", 'public');
+
+                        ImagenProducto::create([
+                            'id_producto' => $product->id_producto,
+                            'id_valor'    => $idValor,
+                            'ruta'        => $path,
+                            'orden'       => $maxOrder,
+                        ]);
+                    }
                 }
             }
 

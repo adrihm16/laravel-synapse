@@ -67,15 +67,26 @@ class ProductController extends Controller
 
     public function show($id)
     {
-        // Render single product page
-        $producto = Producto::with(['variantes.valores', 'gruposOpciones.valores', 'imagenes'])->findOrFail($id);
-        
-        // Also fetch related products
+        $producto = Producto::with([
+            'variantes.valores',
+            'gruposOpciones.valores',
+            'imagenes',
+        ])->findOrFail($id);
+
+        // Build per-color gallery map: { id_valor => [url, url, ...] }
+        $colorGalleries = \App\Models\ImagenProducto::where('id_producto', $producto->id_producto)
+            ->whereNotNull('id_valor')
+            ->orderBy('orden')
+            ->get()
+            ->groupBy('id_valor')
+            ->map(fn ($imgs) => $imgs->map(fn ($i) => $i->url)->values()->toArray())
+            ->toArray();
+
         $relacionados = Producto::with(['variantes.valores', 'gruposOpciones.valores'])
             ->where('id_categoria', $producto->id_categoria)
             ->where('id_producto', '!=', $id)
             ->take(4)->get();
 
-        return view('products.show', compact('producto', 'relacionados'));
+        return view('products.show', compact('producto', 'relacionados', 'colorGalleries'));
     }
 }

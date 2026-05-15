@@ -73,7 +73,14 @@ class AdminProductController extends Controller
         $product->load(['variantes.valores', 'gruposOpciones.valores', 'imagenes']);
         $categories = Categoria::orderBy('nombre')->get();
 
-        return view('admin.products.edit', compact('product', 'categories'));
+        // Per-color gallery: { id_valor => [ImagenProducto, ...] }
+        $colorImages = \App\Models\ImagenProducto::where('id_producto', $product->id_producto)
+            ->whereNotNull('id_valor')
+            ->orderBy('orden')
+            ->get()
+            ->groupBy('id_valor');
+
+        return view('admin.products.edit', compact('product', 'categories', 'colorImages'));
     }
 
     /**

@@ -44,9 +44,19 @@ class Producto extends Model
         return $this->hasMany(GrupoOpcionProducto::class, 'id_producto', 'id_producto')->orderBy('orden', 'asc');
     }
 
+    // Global gallery images (not tied to any color value)
     public function imagenes()
     {
-        return $this->hasMany(ImagenProducto::class, 'id_producto', 'id_producto')->orderBy('orden', 'asc');
+        return $this->hasMany(ImagenProducto::class, 'id_producto', 'id_producto')
+            ->whereNull('id_valor')
+            ->orderBy('orden', 'asc');
+    }
+
+    // All images including per-color ones (for admin)
+    public function todasImagenes()
+    {
+        return $this->hasMany(ImagenProducto::class, 'id_producto', 'id_producto')
+            ->orderBy('orden', 'asc');
     }
 
     public function getPrecioAttribute()
@@ -58,13 +68,19 @@ class Producto extends Model
 
     public function getImagenPrincipalAttribute()
     {
-        // 1. Check if there are any gallery images
+        // 1. First global gallery image
         $firstGalleryImage = $this->imagenes->first();
         if ($firstGalleryImage) {
-            return asset($firstGalleryImage->ruta);
+            return $firstGalleryImage->url;
         }
 
-        // 2. Fallback to the first option value of type 'color' that has an image
+        // 2. First image from any color-specific gallery
+        $firstColorImage = $this->todasImagenes()->whereNotNull('id_valor')->orderBy('orden')->first();
+        if ($firstColorImage) {
+            return $firstColorImage->url;
+        }
+
+        // 3. Single thumbnail on a color value
         $colorGroup = $this->gruposOpciones->where('tipo', 'color')->first();
         if ($colorGroup) {
             $firstColorValue = $colorGroup->valores->whereNotNull('imagen')->first();
@@ -73,7 +89,7 @@ class Producto extends Model
             }
         }
 
-        // 3. Fallback to asset default
+        // 4. Asset default
         return asset('assets/' . str_replace(' ', '', $this->nombre) . '.png');
     }
 

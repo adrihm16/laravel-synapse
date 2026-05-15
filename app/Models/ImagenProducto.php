@@ -13,13 +13,19 @@ class ImagenProducto extends Model
 
     protected $fillable = [
         'id_producto',
+        'id_valor',
         'ruta',
-        'orden'
+        'orden',
     ];
 
     public function producto()
     {
         return $this->belongsTo(Producto::class, 'id_producto', 'id_producto');
+    }
+
+    public function valor()
+    {
+        return $this->belongsTo(ValorOpcionProducto::class, 'id_valor', 'id_valor');
     }
 
     public function getUrlAttribute()

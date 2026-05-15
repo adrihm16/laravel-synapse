@@ -22,6 +22,18 @@
         }
     }
     $initialSelectionsJson = json_encode($initialSelections);
+
+    // Map id_valor → imagen_url for color values that have a single thumbnail image
+    $colorThumbnails = [];
+    foreach ($producto->gruposOpciones as $grupo) {
+        if ($grupo->tipo === 'color') {
+            foreach ($grupo->valores as $valor) {
+                if ($valor->imagen) {
+                    $colorThumbnails[$valor->id_valor] = $valor->imagen_url;
+                }
+            }
+        }
+    }
 @endphp
 
   <!-- Main Content -->
@@ -160,41 +172,78 @@ document.addEventListener('alpine:init', () => {
         variants: {!! $variantsData !!},
         selections: {!! $initialSelectionsJson !!},
         currentVariant: null,
-        mainImage: '{{ $producto->imagen_principal }}',
-        images: [
+        isTransitioning: false,
+        currentImageIndex: 0,
+
+        // Global gallery (no color selected or color has no dedicated gallery)
+        globalImages: [
             @if($producto->imagenes->count() > 0)
                 @foreach($producto->imagenes as $img)
-                    "{{ asset($img->ruta) }}",
+                    "{{ $img->url }}",
                 @endforeach
             @else
                 '{{ $producto->imagen_principal }}'
             @endif
         ],
-        currentImageIndex: 0,
-        isTransitioning: false,
+
+        // Per-color gallery map: { id_valor: [url, ...] }
+        colorGalleries: @json($colorGalleries),
+
+        // Per-color single thumbnail fallback: { id_valor: url }
+        colorThumbnails: @json($colorThumbnails),
+
+        images: [],
+        mainImage: '',
 
         init() {
+            this.images = [...this.globalImages];
+            this.mainImage = this.images[0] ?? '{{ $producto->imagen_principal }}';
             this.updateVariant();
-            this.$watch('selections', () => this.updateVariant(), { deep: true });
+            // Apply color gallery for any pre-selected color
+            this._applyColorGallery();
         },
 
         selectOption(groupId, valueId, imageUrl) {
             this.selections[groupId] = valueId;
-            if (imageUrl) {
-                this.isTransitioning = true;
-                setTimeout(() => {
-                    this.mainImage = imageUrl;
-                    this.isTransitioning = false;
-                }, 150);
+            this._applyColorGallery();
+            this.updateVariant();
+        },
+
+        _applyColorGallery() {
+            for (const valueId of Object.values(this.selections)) {
+                const gallery = this.colorGalleries[valueId];
+                if (gallery && gallery.length > 0) {
+                    this._swapGallery(gallery);
+                    return;
+                }
             }
+            // Fall back to single-image thumbnail per color value
+            for (const valueId of Object.values(this.selections)) {
+                const thumb = this.colorThumbnails[valueId];
+                if (thumb) {
+                    this._swapGallery([thumb]);
+                    return;
+                }
+            }
+            this._swapGallery(this.globalImages);
+        },
+
+        _swapGallery(newImages) {
+            if (JSON.stringify(this.images) === JSON.stringify(newImages)) return;
+            this.isTransitioning = true;
+            setTimeout(() => {
+                this.images = [...newImages];
+                this.currentImageIndex = 0;
+                this.mainImage = this.images[0] ?? '{{ $producto->imagen_principal }}';
+                this.isTransitioning = false;
+            }, 150);
         },
 
         updateVariant() {
             const selectedValueIds = Object.values(this.selections).map(Number);
-            this.currentVariant = this.variants.find(v => {
-                // Check if all selected values are in this variant
-                return selectedValueIds.every(id => v.valores.includes(id)) && v.valores.length === selectedValueIds.length;
-            });
+            this.currentVariant = this.variants.find(v =>
+                selectedValueIds.every(id => v.valores.includes(id)) && v.valores.length === selectedValueIds.length
+            );
         },
 
         nextImage() {
@@ -215,7 +264,7 @@ document.addEventListener('alpine:init', () => {
                 this.mainImage = this.images[this.currentImageIndex];
                 this.isTransitioning = false;
             }, 150);
-        }
+        },
     }));
 });
 </script>

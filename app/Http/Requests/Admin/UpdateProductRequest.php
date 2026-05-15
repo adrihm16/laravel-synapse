@@ -67,9 +67,20 @@ class UpdateProductRequest extends FormRequest
             'imagenes'   => ['nullable', 'array'],
             'imagenes.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
 
-            // Images to delete
+            // Per-color gallery images
+            'galeria_color'       => ['nullable', 'array'],
+            'galeria_color.*'     => ['nullable', 'array'],
+            'galeria_color.*.*'   => ['image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+
+            // Images to delete (global + per-color share same table)
             'eliminar_imagenes'   => ['nullable', 'array'],
             'eliminar_imagenes.*' => ['integer', 'exists:imagen_productos,id_imagen'],
+
+            // Variants and option values to delete
+            'eliminar_variantes'   => ['nullable', 'array'],
+            'eliminar_variantes.*' => ['integer', 'exists:variantes,id_variante'],
+            'eliminar_valores'     => ['nullable', 'array'],
+            'eliminar_valores.*'   => ['integer', 'exists:valores_opcion_producto,id_valor'],
         ];
     }
 
@@ -94,6 +105,8 @@ class UpdateProductRequest extends FormRequest
             'grupos.*.valores.*.imagen.max'    => 'La imagen no puede superar los 2 MB.',
             'imagenes.*.image'                 => 'Cada archivo de galería debe ser una imagen.',
             'imagenes.*.max'                   => 'Las imágenes de galería no pueden superar los 4 MB.',
+            'galeria_color.*.*.image'          => 'Cada imagen de color debe ser una imagen válida.',
+            'galeria_color.*.*.max'            => 'Las imágenes de color no pueden superar los 4 MB.',
         ];
     }
 }

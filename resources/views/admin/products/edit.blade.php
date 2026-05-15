@@ -18,7 +18,8 @@
                     'name' => $valor->nombre,
                     'hex_code' => $valor->hex_code ?? '#000000',
                     'precio_extra' => $valor->precio_extra,
-                    'imagen_url' => $valor->imagen_url
+                    'imagen_url' => $valor->imagen_url,
+                    'deleted' => false,
                 ];
             })->values()->toArray()
         ];
@@ -32,13 +33,10 @@
             'price' => $variante->precio,
             'stock' => $variante->stock,
             'sku' => $variante->sku ?? '',
-            'valRefs' => [] // existing variants don't need valRefs re-linking for update if not modified structurally
+            'valueIds' => $variante->valores->pluck('id_valor')->toArray(),
+            'deleted' => false,
         ];
     })->values()->toArray();
-    
-    // Note: To truly support full EAV editing (modifying existing groups/values and their relation to variants),
-    // it requires complex sync logic. The ProductService `updateProduct` currently wipes variants if
-    // the structure changes. To keep it simple, we inform the user that structural changes require recreating variants.
 @endphp
 
 <div class="max-w-5xl mx-auto">
@@ -66,7 +64,7 @@
     <div class="bg-blue-50 border border-blue-200 text-blue-800 px-6 py-4 rounded-2xl text-sm font-medium mb-6">
         <div class="flex gap-2">
             <x-icon name="information-circle" class="w-5 h-5 text-blue-500 shrink-0" />
-            <p>Debido a la nueva arquitectura, si deseas añadir o eliminar grupos de opciones, se recomienda crear un producto nuevo. Para modificar precios, stock o información básica de este producto, puedes hacerlo a continuación. Si re-generas las variantes, las variantes anteriores se reemplazarán.</p>
+            <p>Puedes eliminar valores de opciones o variantes individuales usando el botón <strong>&times;</strong> / <strong>papelera</strong>. Eliminar un valor eliminará automáticamente todas las variantes que lo usen. Para añadir o eliminar grupos completos de opciones, crea un producto nuevo.</p>
         </div>
     </div>
 
@@ -141,12 +139,15 @@
                         <!-- Existing + pending new values -->
                         <div class="flex flex-wrap gap-2 mb-4">
                             <template x-for="val in group.values" :key="val.id_db">
-                                <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 shadow-sm">
+                                <div x-show="!val.deleted" class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 shadow-sm">
                                     <template x-if="group.type === 'color' && val.hex_code">
                                         <span class="w-3 h-3 rounded-full shrink-0" :style="`background-color:${val.hex_code}`"></span>
                                     </template>
                                     <span x-text="val.name"></span>
                                     <span x-show="val.precio_extra > 0" class="text-xs text-gray-400" x-text="`+${val.precio_extra}€`"></span>
+                                    <button type="button" @click="deleteExistingValue(group.id_db, val.id_db)"
+                                            class="ml-1 text-gray-300 hover:text-red-500 transition font-bold leading-none text-base"
+                                            title="Eliminar este valor (y sus variantes)">&times;</button>
                                 </div>
                             </template>
                             <template x-for="(val, i) in (pendingNewValues[group.id_db] || [])" :key="i">
@@ -221,26 +222,35 @@
                             <th class="py-3 px-4 w-32">Precio Final (€)</th>
                             <th class="py-3 px-4 w-28">Stock</th>
                             <th class="py-3 px-4 w-40">SKU</th>
+                            <th class="py-3 px-4 w-12"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50">
                         <template x-for="(variant, vIndex) in existingVariants" :key="variant.id">
-                            <tr class="hover:bg-gray-50/50">
-                                <td class="py-3 px-4 font-medium text-gray-900" x-text="variant.names"></td>
-                                <td class="py-2 px-4">
-                                    <input type="hidden" :name="`variantes_existentes[${vIndex}][id_variante]`" :value="variant.id_db">
-                                    <input type="number" step="0.01" :name="`variantes_existentes[${vIndex}][precio]`" x-model="variant.price" required
-                                           class="w-full text-sm rounded-lg border-gray-200 focus:ring-black focus:border-black text-right px-2 py-1.5">
-                                </td>
-                                <td class="py-2 px-4">
-                                    <input type="number" :name="`variantes_existentes[${vIndex}][stock]`" x-model="variant.stock" required min="0"
-                                           class="w-full text-sm rounded-lg border-gray-200 focus:ring-black focus:border-black text-center px-2 py-1.5">
-                                </td>
-                                <td class="py-2 px-4">
-                                    <input type="text" :name="`variantes_existentes[${vIndex}][sku]`" x-model="variant.sku"
-                                           class="w-full text-sm rounded-lg border-gray-200 focus:ring-black focus:border-black px-2 py-1.5">
-                                </td>
-                            </tr>
+                            <template x-if="!variant.deleted">
+                                <tr class="hover:bg-gray-50/50">
+                                    <td class="py-3 px-4 font-medium text-gray-900" x-text="variant.names"></td>
+                                    <td class="py-2 px-4">
+                                        <input type="hidden" :name="`variantes_existentes[${vIndex}][id_variante]`" :value="variant.id_db">
+                                        <input type="number" step="0.01" :name="`variantes_existentes[${vIndex}][precio]`" x-model="variant.price" required
+                                               class="w-full text-sm rounded-lg border-gray-200 focus:ring-black focus:border-black text-right px-2 py-1.5">
+                                    </td>
+                                    <td class="py-2 px-4">
+                                        <input type="number" :name="`variantes_existentes[${vIndex}][stock]`" x-model="variant.stock" required min="0"
+                                               class="w-full text-sm rounded-lg border-gray-200 focus:ring-black focus:border-black text-center px-2 py-1.5">
+                                    </td>
+                                    <td class="py-2 px-4">
+                                        <input type="text" :name="`variantes_existentes[${vIndex}][sku]`" x-model="variant.sku"
+                                               class="w-full text-sm rounded-lg border-gray-200 focus:ring-black focus:border-black px-2 py-1.5">
+                                    </td>
+                                    <td class="py-2 px-4">
+                                        <button type="button" @click="deleteExistingVariant(variant.id_db)"
+                                                class="text-red-300 hover:text-red-600 transition" title="Eliminar variante">
+                                            <x-icon name="trash" class="w-4 h-4" />
+                                        </button>
+                                    </td>
+                                </tr>
+                            </template>
                         </template>
                     </tbody>
                 </table>
@@ -408,6 +418,69 @@
                    class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-[#004689] hover:file:bg-blue-100 transition">
         </div>
 
+        <!-- Galerías por Color -->
+        @php
+            $colorGroups = $product->gruposOpciones->where('tipo', 'color');
+        @endphp
+        @if($colorGroups->isNotEmpty())
+        <div class="bg-white rounded-3xl shadow-lg p-8">
+            <h2 class="text-xl font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                <x-icon name="color-swatch" class="w-6 h-6 text-[#004689]" />
+                Galería por color
+            </h2>
+            <p class="text-sm text-gray-500 mb-6">Sube imágenes específicas para cada color. Al seleccionar ese color en la tienda, se mostrará esta galería en lugar de la galería global.</p>
+
+            <div class="space-y-8">
+                @foreach($colorGroups as $grupo)
+                    @foreach($grupo->valores as $valor)
+                        @php $imgs = $colorImages->get($valor->id_valor, collect()); @endphp
+                        <div class="border border-gray-100 rounded-2xl p-5 bg-gray-50/50">
+                            <div class="flex items-center gap-3 mb-4">
+                                @if($valor->hex_code)
+                                    <span class="w-5 h-5 rounded-full border border-gray-200 shrink-0" style="background-color: {{ $valor->hex_code }}"></span>
+                                @endif
+                                <span class="font-semibold text-gray-800">{{ $valor->nombre }}</span>
+                                @if($imgs->isNotEmpty())
+                                    <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium">{{ $imgs->count() }} foto(s)</span>
+                                @endif
+                            </div>
+
+                            @if($imgs->isNotEmpty())
+                                <div class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 gap-3 mb-4">
+                                    @foreach($imgs as $img)
+                                        <div class="relative group aspect-square rounded-xl overflow-hidden border border-gray-200 bg-gray-100" x-data="{ deleted: false }" x-show="!deleted">
+                                            <img src="{{ $img->url }}" class="w-full h-full object-cover transition duration-300 group-hover:scale-110" />
+                                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                <button type="button" @click="deleted = true" class="bg-white text-red-500 p-1.5 rounded-full hover:bg-red-50 transition shadow" title="Eliminar">
+                                                    <x-icon name="trash" class="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                            <template x-if="deleted">
+                                                <input type="hidden" name="eliminar_imagenes[]" value="{{ $img->id_imagen }}">
+                                            </template>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Añadir fotos para <span class="text-gray-900">{{ $valor->nombre }}</span></label>
+                            <input type="file" name="galeria_color[{{ $valor->id_valor }}][]" multiple accept="image/*"
+                                   class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-[#004689] hover:file:bg-blue-100 transition">
+                        </div>
+                    @endforeach
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        <!-- Hidden inputs: items to delete -->
+        <template x-for="id in valuesToDelete" :key="id">
+            <input type="hidden" name="eliminar_valores[]" :value="id">
+        </template>
+        <template x-for="id in variantsToDelete" :key="id">
+            <input type="hidden" name="eliminar_variantes[]" :value="id">
+        </template>
+
         <!-- Botones de Acción -->
         <div class="flex items-center justify-end gap-4 mt-8 bg-white p-6 rounded-3xl shadow-lg border-t-4 border-[#004689] sticky bottom-4 z-50">
             <a href="{{ route('admin.products.index') }}" class="px-6 py-3 rounded-full text-gray-600 font-medium hover:bg-gray-100 transition">
@@ -440,6 +513,10 @@ document.addEventListener('alpine:init', () => {
         pendingNewValues: {},
         newValueInputs: {},
 
+        // Deletions
+        valuesToDelete: [],
+        variantsToDelete: [],
+
         init() {
             this.groups.forEach(g => {
                 this.newValueInputs[g.id_db] = { nombre: '', hex_code: '#000000', precio_extra: 0 };
@@ -456,7 +533,9 @@ document.addEventListener('alpine:init', () => {
         // each with a stable `key` for Alpine tracking and isNew flag.
         allGroupValues(groupId) {
             const group = this.groups.find(g => g.id_db === groupId);
-            const existing = (group?.values || []).map(v => ({ ...v, key: `ex_${v.id_db}`, isNew: false }));
+            const existing = (group?.values || [])
+                .filter(v => !v.deleted)
+                .map(v => ({ ...v, key: `ex_${v.id_db}`, isNew: false }));
             const pending  = (this.pendingNewValues[groupId] || []).map((v, i) => ({
                 id_db:       null,
                 key:         `nv_${groupId}_${i}`,
@@ -514,6 +593,28 @@ document.addEventListener('alpine:init', () => {
 
         removePending(index) {
             this.pendingVariants.splice(index, 1);
+        },
+
+        deleteExistingValue(groupId, valIdDb) {
+            const group = this.groups.find(g => g.id_db === groupId);
+            if (group) {
+                const val = group.values.find(v => v.id_db === valIdDb);
+                if (val) val.deleted = true;
+            }
+            if (!this.valuesToDelete.includes(valIdDb)) this.valuesToDelete.push(valIdDb);
+            // Cascade: auto-mark variants that use this value for deletion
+            this.existingVariants.forEach(v => {
+                if (!v.deleted && v.valueIds && v.valueIds.includes(valIdDb)) {
+                    v.deleted = true;
+                    if (!this.variantsToDelete.includes(v.id_db)) this.variantsToDelete.push(v.id_db);
+                }
+            });
+        },
+
+        deleteExistingVariant(variantIdDb) {
+            const variant = this.existingVariants.find(v => v.id_db === variantIdDb);
+            if (variant) variant.deleted = true;
+            if (!this.variantsToDelete.includes(variantIdDb)) this.variantsToDelete.push(variantIdDb);
         },
 
         pendingLabel(v) {

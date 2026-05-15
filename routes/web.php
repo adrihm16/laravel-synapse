@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminOrderController;
+use App\Http\Controllers\Admin\AdminStatsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -46,6 +48,14 @@ Route::middleware(['auth', 'admin'])
 
         // Phase 3 — Product Management
         Route::resource('products', AdminProductController::class);
+
+        // Orders
+        Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
+        Route::get('orders/{pedido}', [AdminOrderController::class, 'show'])->name('orders.show');
+        Route::patch('orders/{pedido}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
+
+        // Sales Stats
+        Route::get('stats', [AdminStatsController::class, 'index'])->name('stats.index');
     });
 
 require __DIR__.'/auth.php';
