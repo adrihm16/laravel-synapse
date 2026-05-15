@@ -25,9 +25,10 @@ class AdminProductController extends Controller
     public function index(Request $request)
     {
         $products = Producto::with(['categoria', 'variantes'])
-            ->filter($request->only(['search', 'id_categoria']))
+            ->filter($request->only(['search', 'id_categoria', 'destacado']))
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
         $categories = Categoria::orderBy('nombre')->get();
 

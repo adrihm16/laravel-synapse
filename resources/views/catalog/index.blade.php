@@ -77,9 +77,15 @@
              <div class="pb-6 border-b border-gray-100 mb-6">
                 <h3 class="font-semibold text-gray-800 mb-4">Categorías</h3>
                 <div class="space-y-3 max-h-48 overflow-y-auto filters-scroll pr-2">
+                  <label class="flex items-center gap-3 cursor-pointer group pb-3 border-b border-gray-100">
+                    <input type="checkbox" name="featured" value="1"
+                           {{ request('featured') ? 'checked' : '' }}
+                           class="custom-checkbox w-5 h-5 rounded border-gray-300">
+                    <span class="text-sm font-semibold text-gray-800 group-hover:text-[#004689] transition">Solo destacados</span>
+                  </label>
                   @foreach($categorias as $categoria)
                   <label class="flex items-center gap-3 cursor-pointer group">
-                    <input type="checkbox" name="categories[]" value="{{ $categoria->id_categoria }}" 
+                    <input type="checkbox" name="categories[]" value="{{ $categoria->id_categoria }}"
                            {{ in_array($categoria->id_categoria, request('categories', [])) ? 'checked' : '' }}
                            class="custom-checkbox w-5 h-5 rounded border-gray-300">
                     <span class="text-sm text-gray-700 group-hover:text-[#004689] transition">{{ $categoria->nombre }}</span>
@@ -121,7 +127,7 @@
                   Aplicar Filtros
               </button>
               
-              @if(request()->hasAny(['categories', 'brands', 'min_price', 'max_price', 'sort']))
+              @if(request()->hasAny(['categories', 'brands', 'min_price', 'max_price', 'sort', 'featured']))
               <a href="{{ route('catalog.index') }}" class="block text-center mt-4 text-sm text-gray-500 hover:text-red-500 transition">
                   Limpiar Filtros
               </a>

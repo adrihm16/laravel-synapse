@@ -4,10 +4,17 @@ namespace App\Services;
 
 use App\Models\Categoria;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class CategoryService
 {
+    protected function forgetCategoryCaches(): void
+    {
+        Cache::forget('home.categorias');
+        Cache::forget('catalog.categorias');
+    }
+
     /**
      * Create a new category with image upload.
      */
@@ -17,7 +24,9 @@ class CategoryService
             $data['imagen'] = $request->file('imagen')->store('categories', 'public');
         }
 
-        return Categoria::create($data);
+        $category = Categoria::create($data);
+        $this->forgetCategoryCaches();
+        return $category;
     }
 
     /**
@@ -35,6 +44,7 @@ class CategoryService
         }
 
         $category->update($data);
+        $this->forgetCategoryCaches();
 
         return $category;
     }
@@ -48,6 +58,10 @@ class CategoryService
             return false;
         }
 
-        return $category->delete();
+        $deleted = $category->delete();
+        if ($deleted) {
+            $this->forgetCategoryCaches();
+        }
+        return $deleted;
     }
 }

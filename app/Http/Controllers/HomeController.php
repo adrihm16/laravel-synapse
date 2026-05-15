@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Producto;
 use App\Models\Categoria;
 
@@ -10,13 +10,20 @@ class HomeController extends Controller
 {
     public function index()
     {
-        // For the homepage, we can fetch some featured products. 
-        // Based on the DB seed, these are the default products.
-        $destacados = Producto::with(['variantes' => function($query) {
-            $query->orderBy('precio', 'asc');
-        }])->take(4)->get();
-        
-        $categorias = Categoria::all();
+        $destacados = Cache::remember('home.featured_products', 600, function () {
+            return Producto::with([
+                'variantes' => fn ($q) => $q->orderBy('precio', 'asc'),
+                'gruposOpciones.valores',
+                'imagenes',
+                'todasImagenes',
+            ])
+            ->where('destacado', true)
+            ->orderBy('id_producto', 'desc')
+            ->take(4)
+            ->get();
+        });
+
+        $categorias = Cache::remember('home.categorias', 3600, fn () => Categoria::all());
 
         return view('home', compact('destacados', 'categorias'));
     }

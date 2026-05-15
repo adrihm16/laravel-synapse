@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Producto;
 use App\Models\Categoria;
 
@@ -10,13 +11,20 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        // 1. Fetch filter options for the sidebar
-        $categorias = Categoria::orderBy('nombre')->get();
-        // Get unique brands from products that have a brand assigned
-        $brands = Producto::whereNotNull('brand')->where('brand', '!=', '')->distinct()->pluck('brand')->sort()->values();
+        // 1. Fetch filter options for the sidebar (cached — filter UI is invariant per data set)
+        $categorias = Cache::remember('catalog.categorias', 3600, fn () => Categoria::orderBy('nombre')->get());
+        $brands = Cache::remember('catalog.brands', 3600, fn () =>
+            Producto::whereNotNull('brand')->where('brand', '!=', '')->distinct()->pluck('brand')->sort()->values()
+        );
 
         // 2. Build the query
-        $query = Producto::with(['variantes.valores', 'gruposOpciones.valores']);
+        $query = Producto::with([
+            'variantes.valores',
+            'gruposOpciones.valores',
+            'imagenes',
+            'todasImagenes',
+            'categoria',
+        ]);
 
         // Filter by category
         if ($request->filled('categories')) {
@@ -28,6 +36,11 @@ class ProductController extends Controller
         if ($request->filled('brands')) {
             $selectedBrands = (array) $request->input('brands');
             $query->whereIn('brand', $selectedBrands);
+        }
+
+        // Filter: only featured products
+        if ($request->boolean('featured')) {
+            $query->where('destacado', true);
         }
 
         // Filter by price range

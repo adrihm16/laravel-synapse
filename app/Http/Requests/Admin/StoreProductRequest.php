@@ -25,6 +25,7 @@ class StoreProductRequest extends FormRequest
             'id_categoria' => ['nullable', 'exists:categorias,id_categoria'],
             'brand'        => ['nullable', 'string', 'max:100'],
             'precio_base'  => ['nullable', 'numeric', 'min:0'],
+            'destacado'    => ['nullable', 'boolean'],
 
             // Groups
             'grupos'                  => ['nullable', 'array'],

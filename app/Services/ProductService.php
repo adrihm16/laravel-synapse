@@ -6,11 +6,19 @@ use App\Models\ImagenProducto;
 use App\Models\Producto;
 use App\Models\Variante;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class ProductService
 {
+    protected function forgetProductCaches(): void
+    {
+        Cache::forget('home.featured_products');
+        Cache::forget('catalog.brands');
+    }
+
+
     /**
      * Create a new product with option groups, values, variants, and gallery images.
      */
@@ -24,6 +32,7 @@ class ProductService
                 'id_categoria' => $data['id_categoria'] ?? null,
                 'brand'        => $data['brand'] ?? null,
                 'precio_base'  => $data['precio_base'] ?? 0,
+                'destacado'    => (bool) ($data['destacado'] ?? false),
             ]);
 
             // Track value IDs to link variants later
@@ -95,12 +104,14 @@ class ProductService
                 }
             }
 
+            $this->forgetProductCaches();
+
             return $product;
         });
     }
 
     /**
-     * Update an existing product. 
+     * Update an existing product.
      * For simplicity, this rebuilds the variants if provided.
      */
     public function updateProduct(Producto $product, array $data, Request $request): Producto
@@ -113,6 +124,7 @@ class ProductService
                 'id_categoria' => $data['id_categoria'] ?? null,
                 'brand'        => $data['brand'] ?? null,
                 'precio_base'  => $data['precio_base'] ?? 0,
+                'destacado'    => (bool) ($data['destacado'] ?? false),
             ]);
 
             // Delete specified existing variants
@@ -257,6 +269,8 @@ class ProductService
                 }
             }
 
+            $this->forgetProductCaches();
+
             return $product;
         });
     }
@@ -269,6 +283,7 @@ class ProductService
         DB::transaction(function () use ($product) {
             $product->variantes()->delete();
             $product->delete();
+            $this->forgetProductCaches();
         });
     }
 }

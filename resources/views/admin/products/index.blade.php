@@ -44,10 +44,15 @@
                     <option value="{{ $cat->id_categoria }}" {{ request('id_categoria') == $cat->id_categoria ? 'selected' : '' }}>{{ $cat->nombre }}</option>
                 @endforeach
             </select>
+            <select name="destacado" class="rounded-xl px-4 py-3 focus:ring-2 focus:ring-black focus:border-transparent outline-none bg-gray-50 focus:bg-white border border-gray-200 transition min-w-[160px]">
+                <option value="">Destacado (todos)</option>
+                <option value="1" {{ request('destacado') === '1' ? 'selected' : '' }}>Solo destacados</option>
+                <option value="0" {{ request('destacado') === '0' ? 'selected' : '' }}>No destacados</option>
+            </select>
             <button type="submit" class="rounded-full bg-[#004689] hover:bg-[#002244] text-white font-semibold py-3 px-6 transition shadow-md active:scale-95">
                 Filtrar
             </button>
-            @if(request('search') || request('id_categoria'))
+            @if(request()->hasAny(['search', 'id_categoria', 'destacado']))
                 <a href="{{ route('admin.products.index') }}" class="rounded-full border-2 border-gray-200 text-gray-600 hover:border-gray-400 font-semibold py-3 px-6 transition text-center">
                     Limpiar
                 </a>
@@ -86,7 +91,12 @@
                                         @endif
                                     </div>
                                     <div>
-                                        <p class="font-medium text-gray-900">{{ $product->nombre }}</p>
+                                        <p class="font-medium text-gray-900 flex items-center gap-2">
+                                            {{ $product->nombre }}
+                                            @if($product->destacado)
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700">Destacado</span>
+                                            @endif
+                                        </p>
                                         @if($product->brand)
                                             <p class="text-xs text-gray-400">{{ $product->brand }}</p>
                                         @endif

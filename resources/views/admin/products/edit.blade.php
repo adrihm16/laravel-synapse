@@ -116,6 +116,16 @@
                     <input type="number" step="0.01" name="precio_base" x-model="basePrice" required
                            class="w-full md:w-1/3 rounded-xl px-4 py-3 focus:ring-2 focus:ring-black focus:border-transparent outline-none bg-gray-50 focus:bg-white border border-gray-200 transition">
                 </div>
+
+                <div class="md:col-span-2">
+                    <input type="hidden" name="destacado" value="0">
+                    <label class="inline-flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="destacado" value="1"
+                               {{ old('destacado', $product->destacado) ? 'checked' : '' }}
+                               class="w-5 h-5 rounded border-gray-300 text-[#004689] focus:ring-[#004689]/20">
+                        <span class="text-sm font-medium text-gray-700">Marcar como destacado (aparecerá en la portada)</span>
+                    </label>
+                </div>
             </div>
         </div>
 

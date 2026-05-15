@@ -19,6 +19,11 @@ class Producto extends Model
         'id_categoria',
         'brand',
         'precio_base',
+        'destacado',
+    ];
+
+    protected $casts = [
+        'destacado' => 'boolean',
     ];
 
     /**
@@ -61,8 +66,10 @@ class Producto extends Model
 
     public function getPrecioAttribute()
     {
-        // Return minimum variant price or base price
-        $minPrecio = $this->variantes()->min('precio');
+        // Use loaded collection when available to avoid N+1 in product listings
+        $minPrecio = $this->relationLoaded('variantes')
+            ? $this->variantes->min('precio')
+            : $this->variantes()->min('precio');
         return $minPrecio ? (float) $minPrecio : (float) $this->precio_base;
     }
 
@@ -74,8 +81,10 @@ class Producto extends Model
             return $firstGalleryImage->url;
         }
 
-        // 2. First image from any color-specific gallery
-        $firstColorImage = $this->todasImagenes()->whereNotNull('id_valor')->orderBy('orden')->first();
+        // 2. First image from any color-specific gallery (prefer loaded collection)
+        $firstColorImage = $this->relationLoaded('todasImagenes')
+            ? $this->todasImagenes->whereNotNull('id_valor')->sortBy('orden')->first()
+            : $this->todasImagenes()->whereNotNull('id_valor')->orderBy('orden')->first();
         if ($firstColorImage) {
             return $firstColorImage->url;
         }
@@ -108,5 +117,10 @@ class Producto extends Model
         $query->when($filters['id_categoria'] ?? null, function ($query, $id_categoria) {
             $query->where('id_categoria', $id_categoria);
         });
+
+        // 'destacado' filter accepts: '1' = only featured, '0' = only non-featured
+        if (array_key_exists('destacado', $filters) && $filters['destacado'] !== null && $filters['destacado'] !== '') {
+            $query->where('destacado', (bool) $filters['destacado']);
+        }
     }
 }
