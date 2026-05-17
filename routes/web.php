@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminStatsController;
+use App\Http\Controllers\Admin\AdminHeroBannerController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -56,6 +57,10 @@ Route::middleware(['auth', 'admin'])
 
         // Sales Stats
         Route::get('stats', [AdminStatsController::class, 'index'])->name('stats.index');
+
+        // Hero banner
+        Route::patch('hero-banner/{banner}', [AdminHeroBannerController::class, 'update'])
+            ->name('hero-banner.update');
     });
 
 require __DIR__.'/auth.php';

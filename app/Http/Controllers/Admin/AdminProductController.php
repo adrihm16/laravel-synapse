@@ -24,7 +24,12 @@ class AdminProductController extends Controller
      */
     public function index(Request $request)
     {
-        $products = Producto::with(['categoria', 'variantes'])
+        $products = Producto::with([
+                'categoria',
+                'variantes.valores',
+                'gruposOpciones.valores',
+                'imagenes',
+            ])
             ->filter($request->only(['search', 'id_categoria', 'destacado']))
             ->orderBy('created_at', 'desc')
             ->paginate(15)

@@ -13,9 +13,19 @@ class UserService
      */
     public function createUser(array $data): User
     {
+        $rol = $data['rol'] ?? 'cliente';
         $data['password'] = Hash::make($data['password']);
 
-        return User::create($data);
+        $user = User::create([
+            'name'     => $data['name'],
+            'email'    => $data['email'],
+            'password' => $data['password'],
+        ]);
+
+        $user->rol = $rol;
+        $user->save();
+
+        return $user;
     }
 
     /**
@@ -23,14 +33,18 @@ class UserService
      */
     public function updateUser(User $user, array $data): User
     {
-        // Only update password if one was provided
+        $user->name  = $data['name'];
+        $user->email = $data['email'];
+
         if (!empty($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        } else {
-            unset($data['password']);
+            $user->password = Hash::make($data['password']);
         }
 
-        $user->update($data);
+        if (array_key_exists('rol', $data)) {
+            $user->rol = $data['rol'];
+        }
+
+        $user->save();
 
         return $user;
     }

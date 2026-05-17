@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateOrderStatusRequest;
 use App\Models\Pedido;
@@ -20,7 +21,7 @@ class AdminOrderController extends Controller
             ->orderByDesc('fecha')
             ->paginate(15);
 
-        $statuses = ['pendiente', 'pagado', 'enviado', 'entregado'];
+        $statuses = OrderStatus::values();
 
         return view('admin.orders.index', compact('orders', 'statuses'));
     }
@@ -33,7 +34,7 @@ class AdminOrderController extends Controller
             'detalles.variante.valores.grupo',
         ]);
 
-        $statuses = ['pendiente', 'enviado', 'entregado'];
+        $statuses = OrderStatus::manuallyAssignable();
 
         return view('admin.orders.show', compact('pedido', 'statuses'));
     }

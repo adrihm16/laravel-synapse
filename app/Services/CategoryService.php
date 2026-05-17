@@ -5,10 +5,11 @@ namespace App\Services;
 use App\Models\Categoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
 
 class CategoryService
 {
+    public function __construct(protected ImageService $images) {}
+
     protected function forgetCategoryCaches(): void
     {
         Cache::forget('home.categorias');
@@ -21,7 +22,7 @@ class CategoryService
     public function createCategory(array $data, Request $request): Categoria
     {
         if ($request->hasFile('imagen')) {
-            $data['imagen'] = $request->file('imagen')->store('categories', 'public');
+            $data['imagen'] = $this->images->storeAsWebp($request->file('imagen'), 'categories');
         }
 
         $category = Categoria::create($data);
@@ -35,12 +36,8 @@ class CategoryService
     public function updateCategory(Categoria $category, array $data, Request $request): Categoria
     {
         if ($request->hasFile('imagen')) {
-            // Delete old image from storage if it exists
-            if ($category->getRawOriginal('imagen')) {
-                Storage::disk('public')->delete($category->getRawOriginal('imagen'));
-            }
-
-            $data['imagen'] = $request->file('imagen')->store('categories', 'public');
+            $this->images->delete($category->getRawOriginal('imagen'));
+            $data['imagen'] = $this->images->storeAsWebp($request->file('imagen'), 'categories');
         }
 
         $category->update($data);

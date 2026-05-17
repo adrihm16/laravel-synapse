@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\Cart\AddToCartRequest;
+use App\Http\Requests\Cart\RemoveCartItemRequest;
+use App\Http\Requests\Cart\UpdateCartItemRequest;
 use App\Models\Carrito;
 
 class CartController extends Controller
@@ -14,64 +16,56 @@ class CartController extends Controller
         return view('cart.index', compact('carrito'));
     }
 
-    public function add(Request $request)
+    public function add(AddToCartRequest $request)
     {
-        $request->validate([
-            'id_variante' => 'required|exists:variantes,id_variante',
-            'cantidad' => 'integer|min:1',
-        ]);
-
+        $data = $request->validated();
         $user = auth()->user();
+        $cantidad = $data['cantidad'] ?? 1;
 
         $cartItem = Carrito::where('id_usuario', $user->id)
-                           ->where('id_variante', $request->id_variante)
+                           ->where('id_variante', $data['id_variante'])
                            ->first();
 
         if ($cartItem) {
-            $cartItem->cantidad += $request->input('cantidad', 1);
+            $cartItem->cantidad += $cantidad;
             $cartItem->save();
         } else {
             Carrito::create([
-                'id_usuario' => $user->id,
-                'id_variante' => $request->id_variante,
-                'cantidad' => $request->input('cantidad', 1),
+                'id_usuario'  => $user->id,
+                'id_variante' => $data['id_variante'],
+                'cantidad'    => $cantidad,
             ]);
         }
 
         return redirect()->route('cart.index')->with('success', 'Producto añadido al carrito');
     }
 
-    public function remove(Request $request)
+    public function remove(RemoveCartItemRequest $request)
     {
-        $request->validate([
-            'id_carrito' => 'required|exists:carrito,id_carrito',
-        ]);
-
+        $data = $request->validated();
         $user = auth()->user();
+
         Carrito::where('id_usuario', $user->id)
-               ->where('id_carrito', $request->id_carrito)
+               ->where('id_carrito', $data['id_carrito'])
                ->delete();
 
         return redirect()->route('cart.index')->with('success', 'Producto eliminado');
     }
 
-    public function update(Request $request)
+    public function update(UpdateCartItemRequest $request)
     {
-        $request->validate([
-            'id_carrito' => 'required|exists:carrito,id_carrito',
-            'action' => 'required|in:increment,decrement',
-        ]);
-
+        $data = $request->validated();
         $user = auth()->user();
+
         $cartItem = Carrito::where('id_usuario', $user->id)
-                           ->where('id_carrito', $request->id_carrito)
+                           ->where('id_carrito', $data['id_carrito'])
                            ->first();
 
         if ($cartItem) {
-            if ($request->action === 'increment') {
+            if ($data['action'] === 'increment') {
                 $cartItem->cantidad++;
                 $cartItem->save();
-            } elseif ($request->action === 'decrement') {
+            } elseif ($data['action'] === 'decrement') {
                 if ($cartItem->cantidad > 1) {
                     $cartItem->cantidad--;
                     $cartItem->save();

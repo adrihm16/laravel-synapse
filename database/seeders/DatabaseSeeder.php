@@ -10,11 +10,19 @@ use App\Models\User;
 use App\Models\ValorOpcionProducto;
 use App\Models\Variante;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
+    {
+        DB::transaction(function () {
+            $this->seedAll();
+        });
+    }
+
+    private function seedAll(): void
     {
         // 1. Categorías
         $categorias = ['Smartphones', 'Ordenadores', 'Tablets', 'Accesorios', 'Hogar'];
@@ -23,19 +31,21 @@ class DatabaseSeeder extends Seeder
         }
 
         // 2. Usuarios
-        User::create([
+        $admin = User::create([
             'name'     => 'Admin User',
             'email'    => 'admin@synapse.com',
             'password' => Hash::make('password123'),
-            'rol'      => 'admin',
         ]);
+        $admin->rol = 'admin';
+        $admin->save();
 
-        User::create([
+        $cliente = User::create([
             'name'     => 'Juan Pérez',
             'email'    => 'juan@correo.com',
             'password' => Hash::make('password123'),
-            'rol'      => 'cliente',
         ]);
+        $cliente->rol = 'cliente';
+        $cliente->save();
 
         $catSmartphones = Categoria::where('nombre', 'Smartphones')->first()->id_categoria;
         $catOrdenadores = Categoria::where('nombre', 'Ordenadores')->first()->id_categoria;

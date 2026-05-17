@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Producto;
 use App\Models\Categoria;
+use App\Models\HeroBanner;
 use App\Models\Pedido;
 use App\Models\Variante;
-use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
@@ -26,6 +26,11 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        return view('admin.dashboard', compact('kpis', 'latestOrders'));
+        $heroBanner = HeroBanner::where('activo', true)
+            ->orderBy('orden')
+            ->first()
+            ?? HeroBanner::orderBy('orden')->first();
+
+        return view('admin.dashboard', compact('kpis', 'latestOrders', 'heroBanner'));
     }
 }

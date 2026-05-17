@@ -137,8 +137,7 @@
                 <use xlink:href="{{ asset('assets/sprite.svg#icon-cart') }}" />
             </svg>
             @auth
-                @php $cartCount = auth()->user()->carritoItems()->sum('cantidad'); @endphp
-                @if($cartCount > 0)
+                @if(($cartCount ?? 0) > 0)
                 <span class="absolute -top-2 -right-2 bg-red-500 text-xs font-bold px-2 rounded-full border-2 border-[#002F5C]">{{ $cartCount }}</span>
                 @endif
             @endauth

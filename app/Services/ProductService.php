@@ -8,10 +8,11 @@ use App\Models\Variante;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class ProductService
 {
+    public function __construct(protected ImageService $images) {}
+
     protected function forgetProductCaches(): void
     {
         Cache::forget('home.featured_products');
@@ -52,8 +53,10 @@ class ProductService
                         foreach ($grupoData['valores'] as $vIndex => $valorData) {
                             $imagePath = null;
                             if ($request->hasFile("grupos.{$gIndex}.valores.{$vIndex}.imagen")) {
-                                $imagePath = $request->file("grupos.{$gIndex}.valores.{$vIndex}.imagen")
-                                    ->store("products/{$product->id_producto}/options", 'public');
+                                $imagePath = $this->images->storeAsWebp(
+                                    $request->file("grupos.{$gIndex}.valores.{$vIndex}.imagen"),
+                                    "products/{$product->id_producto}/options"
+                                );
                             }
 
                             $valor = $grupo->valores()->create([
@@ -95,7 +98,7 @@ class ProductService
             // 4. Upload gallery images
             if ($request->hasFile('imagenes')) {
                 foreach ($request->file('imagenes') as $index => $file) {
-                    $path = $file->store("products/{$product->id_producto}/gallery", 'public');
+                    $path = $this->images->storeAsWebp($file, "products/{$product->id_producto}/gallery");
 
                     $product->imagenes()->create([
                         'ruta'  => $path,
@@ -227,7 +230,7 @@ class ProductService
                     ->get();
 
                 foreach ($imagesToDelete as $img) {
-                    Storage::disk('public')->delete($img->ruta);
+                    $this->images->delete($img->ruta);
                     $img->delete();
                 }
             }
@@ -238,7 +241,7 @@ class ProductService
 
                 foreach ($request->file('imagenes') as $file) {
                     $maxOrder++;
-                    $path = $file->store("products/{$product->id_producto}/gallery", 'public');
+                    $path = $this->images->storeAsWebp($file, "products/{$product->id_producto}/gallery");
 
                     $product->imagenes()->create([
                         'ruta'  => $path,
@@ -257,7 +260,7 @@ class ProductService
 
                     foreach ($files as $file) {
                         $maxOrder++;
-                        $path = $file->store("products/{$product->id_producto}/colors/{$idValor}", 'public');
+                        $path = $this->images->storeAsWebp($file, "products/{$product->id_producto}/colors/{$idValor}");
 
                         ImagenProducto::create([
                             'id_producto' => $product->id_producto,

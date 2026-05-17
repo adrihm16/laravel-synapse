@@ -3,14 +3,16 @@
 
 @section('content')
   <!-- Hero Section -->
+  @if($heroBanner)
   <section class="w-full bg-slate-900">
-    <a href="{{ route('catalog.index') }}" class="block group relative overflow-hidden">
-      <img src="{{ asset('assets/HeroOnePlus15Mobile.png') }}" alt="OnePlus 15"
+    <a href="{{ $heroBanner->enlace ?? route('catalog.index') }}" class="block group relative overflow-hidden">
+      <img src="{{ $heroBanner->imagen_mobile_url }}" alt="{{ $heroBanner->titulo ?? 'Banner' }}"
         class="w-full h-auto object-cover md:hidden transition-all duration-700 group-hover:scale-105 group-hover:brightness-110" />
-      <img src="{{ asset('assets/HeroOnePlus15.png') }}" alt="OnePlus 15"
+      <img src="{{ $heroBanner->imagen_desktop_url }}" alt="{{ $heroBanner->titulo ?? 'Banner' }}"
         class="hidden w-full h-auto object-cover md:block transition-all duration-700 group-hover:scale-[1.01] group-hover:brightness-110" />
     </a>
   </section>
+  @endif
 
   <!-- Productos Destacados -->
   <section class="max-w-[95%] mx-auto px-6 py-10">

@@ -48,7 +48,10 @@ class StoreCart extends Component
     public function render()
     {
         $user = auth()->user();
-        $carrito = Carrito::with('variante.producto')->where('id_usuario', $user->id)->get();
+        $carrito = Carrito::with([
+            'variante.producto.imagenes',
+            'variante.valores',
+        ])->where('id_usuario', $user->id)->get();
         return view('livewire.store-cart', compact('carrito'));
     }
 }

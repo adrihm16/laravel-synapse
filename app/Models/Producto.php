@@ -76,12 +76,14 @@ class Producto extends Model
     public function getImagenPrincipalAttribute()
     {
         // 1. First global gallery image
-        $firstGalleryImage = $this->imagenes->first();
+        $firstGalleryImage = $this->relationLoaded('imagenes')
+            ? $this->imagenes->first()
+            : $this->imagenes()->first();
         if ($firstGalleryImage) {
             return $firstGalleryImage->url;
         }
 
-        // 2. First image from any color-specific gallery (prefer loaded collection)
+        // 2. First image from any color-specific gallery
         $firstColorImage = $this->relationLoaded('todasImagenes')
             ? $this->todasImagenes->whereNotNull('id_valor')->sortBy('orden')->first()
             : $this->todasImagenes()->whereNotNull('id_valor')->orderBy('orden')->first();
@@ -90,9 +92,13 @@ class Producto extends Model
         }
 
         // 3. Single thumbnail on a color value
-        $colorGroup = $this->gruposOpciones->where('tipo', 'color')->first();
+        $colorGroup = $this->relationLoaded('gruposOpciones')
+            ? $this->gruposOpciones->where('tipo', 'color')->first()
+            : $this->gruposOpciones()->where('tipo', 'color')->first();
         if ($colorGroup) {
-            $firstColorValue = $colorGroup->valores->whereNotNull('imagen')->first();
+            $firstColorValue = $colorGroup->relationLoaded('valores')
+                ? $colorGroup->valores->whereNotNull('imagen')->first()
+                : $colorGroup->valores()->whereNotNull('imagen')->first();
             if ($firstColorValue) {
                 return $firstColorValue->imagen_url;
             }

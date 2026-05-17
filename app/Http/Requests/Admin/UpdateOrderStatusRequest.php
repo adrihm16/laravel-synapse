@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\OrderStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -15,7 +16,7 @@ class UpdateOrderStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'estado' => ['required', Rule::in(['pendiente', 'enviado', 'entregado'])],
+            'estado' => ['required', Rule::in(OrderStatus::manuallyAssignable())],
         ];
     }
 
