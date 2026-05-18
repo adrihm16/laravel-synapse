@@ -5,19 +5,11 @@ namespace App\Services;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
 
 class ImageService
 {
-    protected ImageManager $manager;
-
     protected int $quality = 85;
-
-    public function __construct()
-    {
-        $this->manager = new ImageManager(new Driver());
-    }
 
     /**
      * Convert an uploaded image to WebP and store it under the given directory on the public disk.
@@ -25,7 +17,7 @@ class ImageService
      */
     public function storeAsWebp(UploadedFile $file, string $directory, ?int $quality = null): string
     {
-        $image = $this->manager->read($file->getRealPath());
+        $image = ImageManager::gd()->read($file->getRealPath());
         $encoded = $image->toWebp($quality ?? $this->quality);
 
         $filename = Str::random(40) . '.webp';

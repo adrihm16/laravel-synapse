@@ -38,8 +38,9 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Copy application source
 COPY . .
 
-# Copy Vite-built assets from node stage
+# Copy Vite-built assets from node stage and remove dev server marker
 COPY --from=node-builder /app/public/build ./public/build
+RUN rm -f public/hot
 
 # Install PHP dependencies without running post-install artisan scripts
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress --no-scripts

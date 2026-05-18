@@ -1,6 +1,15 @@
 COMPOSE = docker-compose
 
-.PHONY: up down restart build logs shell migrate seed fresh test tinker
+.PHONY: setup up down restart build logs shell migrate seed fresh test tinker
+
+setup:
+	@test -f .env || cp .env.example .env
+	$(COMPOSE) up -d --build
+	$(COMPOSE) exec app composer install
+	$(COMPOSE) exec app php artisan key:generate
+	$(COMPOSE) exec app php artisan migrate --force --seed
+	$(COMPOSE) exec app npm install
+	$(COMPOSE) exec app npm run build
 
 up:
 	$(COMPOSE) up -d --build

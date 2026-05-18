@@ -28,6 +28,9 @@ services:
       db:
         condition: service_healthy
     volumes:
+      - .:/var/www/html
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
       - storage_data:/var/www/html/storage
 
   worker:
@@ -54,6 +57,9 @@ services:
       db:
         condition: service_healthy
     volumes:
+      - .:/var/www/html
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
       - storage_data:/var/www/html/storage
 
   db:
