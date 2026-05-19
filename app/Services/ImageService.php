@@ -5,6 +5,8 @@ namespace App\Services;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Encoders\WebpEncoder;
 use Intervention\Image\ImageManager;
 
 class ImageService
@@ -17,8 +19,8 @@ class ImageService
      */
     public function storeAsWebp(UploadedFile $file, string $directory, ?int $quality = null): string
     {
-        $image = ImageManager::gd()->read($file->getRealPath());
-        $encoded = $image->toWebp($quality ?? $this->quality);
+        $image = (new ImageManager(new Driver()))->decode($file->getRealPath());
+        $encoded = $image->encode(new WebpEncoder($quality ?? $this->quality));
 
         $filename = Str::random(40) . '.webp';
         $path = trim($directory, '/') . '/' . $filename;

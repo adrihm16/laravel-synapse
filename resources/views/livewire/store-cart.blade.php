@@ -20,7 +20,7 @@
             $producto = $item->variante->producto;
             $precio = $item->variante->precio;
             $subtotal += $precio * $item->cantidad;
-            $imagen = $item->variante->imagen ? asset($item->variante->imagen) : asset('assets/' . str_replace(' ', '', $producto->nombre) . '.png');
+            $imagen = $producto->imagen_principal;
           @endphp
           <div x-data="{ removing: false }" 
                x-show="!removing" 

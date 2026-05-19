@@ -66,7 +66,7 @@ class AdminProductController extends Controller
      */
     public function show(Producto $product)
     {
-        $product->load(['categoria', 'variantes', 'imagenes']);
+        $product->load(['categoria', 'variantes.valores', 'gruposOpciones.valores', 'imagenes']);
 
         return view('admin.products.show', compact('product'));
     }

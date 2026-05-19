@@ -84,6 +84,7 @@ class ProductController extends Controller
             'variantes.valores',
             'gruposOpciones.valores',
             'imagenes',
+            'todasImagenes',
         ])->findOrFail($id);
 
         // Build per-color gallery map: { id_valor => [url, url, ...] }

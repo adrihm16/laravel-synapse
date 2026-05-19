@@ -50,6 +50,7 @@ class StoreCart extends Component
         $user = auth()->user();
         $carrito = Carrito::with([
             'variante.producto.imagenes',
+            'variante.producto.todasImagenes',
             'variante.valores',
         ])->where('id_usuario', $user->id)->get();
         return view('livewire.store-cart', compact('carrito'));

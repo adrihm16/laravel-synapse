@@ -47,16 +47,16 @@
       <div class="max-w-[95%] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-12 items-stretch">
           
           <!-- Image Carousel Column -->
-          <div class="lg:col-span-2 bg-white rounded-3xl p-8 shadow-md flex items-center justify-between relative h-full min-h-[31.25rem]">
-              <button @click="prevImage()" x-show="images.length > 1" class="text-gray-300 hover:text-gray-800 text-4xl transition duration-200 px-2 z-10">
+          <div class="lg:col-span-2 bg-white rounded-3xl p-8 shadow-md flex items-center justify-between h-full min-h-[31.25rem] overflow-hidden gap-2">
+              <button @click="prevImage()" x-show="images.length > 1" class="flex-shrink-0 text-gray-300 hover:text-gray-800 text-4xl transition duration-200 px-2 z-10">
                   &#10094;
               </button>
-              <div class="w-full flex justify-center absolute inset-0 items-center pointer-events-none">
+              <div class="flex-1 overflow-hidden" style="height: 26rem;">
                   <img :src="mainImage" alt="{{ $producto->nombre }}"
-                      class="max-h-[25rem] object-contain pointer-events-auto transition-opacity duration-300"
+                      class="w-full h-full object-contain pointer-events-auto transition-opacity duration-300"
                       :class="{ 'opacity-0': isTransitioning, 'opacity-100': !isTransitioning }">
               </div>
-              <button @click="nextImage()" x-show="images.length > 1" class="text-gray-300 hover:text-gray-800 text-4xl transition duration-200 px-2 z-10">
+              <button @click="nextImage()" x-show="images.length > 1" class="flex-shrink-0 text-gray-300 hover:text-gray-800 text-4xl transition duration-200 px-2 z-10">
                   &#10095;
               </button>
           </div>
@@ -99,23 +99,6 @@
                       @endif
                   </div>
                   @endforeach
-
-                  <!-- Gift box -->
-                  <div>
-                      <p class="text-gray-700 font-medium mb-2">Llévatelo de regalo</p>
-                      <div class="border border-gray-200 rounded-xl p-4 flex gap-4 items-center">
-                          <div class="w-16 h-16 flex-shrink-0 bg-gray-50 rounded-md flex items-center justify-center">
-                              <span class="text-2xl">🎁</span>
-                          </div>
-                          <div class="text-xs">
-                              <p class="text-gray-600 mb-1">DJI Osmo Mobile 7 Gimbal</p>
-                              <div class="flex items-center gap-2">
-                                  <span class="line-through text-gray-400">99,00 €</span>
-                                  <span class="text-red-500 font-bold">Ahorra 99,00 €</span>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
 
                   <!-- Total & Add to Cart Container -->
                   <div class="mt-6 pt-6 border-t border-gray-100 text-center space-y-4">
@@ -177,8 +160,9 @@ document.addEventListener('alpine:init', () => {
 
         // Global gallery (no color selected or color has no dedicated gallery)
         globalImages: [
-            @if($producto->imagenes->count() > 0)
-                @foreach($producto->imagenes as $img)
+            @php $galleryImages = $producto->imagenes->count() > 0 ? $producto->imagenes : $producto->todasImagenes @endphp
+            @if($galleryImages->count() > 0)
+                @foreach($galleryImages as $img)
                     "{{ $img->url }}",
                 @endforeach
             @else
@@ -199,17 +183,16 @@ document.addEventListener('alpine:init', () => {
             this.images = [...this.globalImages];
             this.mainImage = this.images[0] ?? '{{ $producto->imagen_principal }}';
             this.updateVariant();
-            // Apply color gallery for any pre-selected color
-            this._applyColorGallery();
         },
 
         selectOption(groupId, valueId, imageUrl) {
             this.selections[groupId] = valueId;
-            this._applyColorGallery();
+            this._applyColorGallery(imageUrl);
             this.updateVariant();
         },
 
-        _applyColorGallery() {
+        _applyColorGallery(clickedImageUrl = null) {
+            // 1. If any selected color has a dedicated multi-image gallery, use it
             for (const valueId of Object.values(this.selections)) {
                 const gallery = this.colorGalleries[valueId];
                 if (gallery && gallery.length > 0) {
@@ -217,15 +200,20 @@ document.addEventListener('alpine:init', () => {
                     return;
                 }
             }
-            // Fall back to single-image thumbnail per color value
-            for (const valueId of Object.values(this.selections)) {
-                const thumb = this.colorThumbnails[valueId];
-                if (thumb) {
-                    this._swapGallery([thumb]);
-                    return;
+
+            // 2. Restore global images
+            this._swapGallery(this.globalImages);
+
+            // 3. If the clicked color has a thumbnail, navigate to it inside the carousel
+            if (clickedImageUrl) {
+                const idx = this.images.indexOf(clickedImageUrl);
+                if (idx !== -1) {
+                    this.currentImageIndex = idx;
+                    this.mainImage = this.images[idx];
+                } else {
+                    this.mainImage = clickedImageUrl;
                 }
             }
-            this._swapGallery(this.globalImages);
         },
 
         _swapGallery(newImages) {

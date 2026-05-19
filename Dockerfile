@@ -19,7 +19,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxml2-dev \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    libwebp-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j$(nproc) \
         pdo_mysql \
         mbstring \
@@ -38,8 +39,9 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Copy application source
 COPY . .
 
-# Copy Vite-built assets from node stage and remove dev server marker
-COPY --from=node-builder /app/public/build ./public/build
+# Store Vite-built assets outside the bind-mount root so the entrypoint can
+# restore them after the host volume shadows public/build at runtime.
+COPY --from=node-builder /app/public/build /build-assets
 RUN rm -f public/hot
 
 # Install PHP dependencies without running post-install artisan scripts
